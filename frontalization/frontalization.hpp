@@ -19,7 +19,7 @@ public:
   ~Frontalization();
 
 private:
-  void frontalize(cv::Mat& image, cv::Rect faceRect, cv::Mat& cameraModel,  int idx, cv::Mat& outFrontal);
+  void frontalize(cv::Mat& image, cv::Rect& faceRect, cv::Mat& cameraModel, cv::Mat& outFrontal);
   FaceAttribute* _faceatt;
   CameraModel*   _camera;
   float          ACC_CONST = 800;

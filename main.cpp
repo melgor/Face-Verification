@@ -29,22 +29,23 @@ int main(int argc, char **argv)
     {
       if(exists(p) && is_directory(p))// does p actually exist?
       {
-         fs::directory_iterator end_iter;
-         for (fs::directory_iterator dir_itr(p); dir_itr != end_iter; ++dir_itr)
-         {
-           std::string extension = dir_itr->path().extension().string();
-           if(extension == ".png" || extension == ".jpg" || extension == ".jpeg")
-           {
-              path.push_back(dir_itr->path().string());
-              std::string out_path = std::to_string(1) +dir_itr->path().string();
-              path_save.push_back(out_path);
-              std::cerr << "adding  " << dir_itr->path().string() << std::endl;
-              cv::Mat out, image = cv::imread(dir_itr->path().string());
-              front.getFrontalFace(image,out);
-              std::cerr << "save  " << out_path << std::endl;
-              cv::imwrite(out_path,out);
-           }
-         }
+        fs::recursive_directory_iterator itr(p);
+        while (itr != boost::filesystem::recursive_directory_iterator())
+        {
+         std::string extension = itr->path().extension().string();
+          if(extension == ".png" || extension == ".jpg" || extension == ".jpeg")
+          {
+            path.push_back(itr->path().string());
+            std::string out_path = itr->path().string();
+            path_save.push_back(out_path);
+            std::cerr << "adding  " << itr->path().string() << std::endl;
+            cv::Mat out, image = cv::imread(itr->path().string());
+            front.getFrontalFace(image,out);
+            std::cerr << "save  " << out_path << std::endl;
+            cv::imwrite(out_path,out);
+          }
+          ++itr;
+        }
       }
       else
       {

@@ -6,6 +6,7 @@
 
 #include "Parser.hpp"
 #include <boost/filesystem.hpp>
+#include <iostream>
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;

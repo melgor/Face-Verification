@@ -1,1 +1,4 @@
 deepface
+*.[oa]
+*.yaml
+*.dat
