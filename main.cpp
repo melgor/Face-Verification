@@ -4,11 +4,12 @@
 * @Last Modified 2015-03-03
 */
 #include <chrono>
-#include "frontalization/frontalization.hpp"
-#include "net/fetureExtractor.hpp"
 #include <iostream>
 #include <boost/filesystem.hpp>
-#include <chrono>
+#include "frontalization/frontalization.hpp"
+#include "net/fetureExtractor.hpp"
+#include "verification/verification.hpp"
+
 
 using namespace std;
 int main(int argc, char **argv)
@@ -22,6 +23,12 @@ int main(int argc, char **argv)
   {
     FetureExtractor net_ext(conf);
     net_ext.extractAllFeatures();
+  }
+  else if(conf.mode == "verify")
+  {
+    cout<<"Verify"<<endl;
+    Verificator verif(conf);
+    verif.verifyValPerson();
   }
   else if(conf.mode == "detect")
   {

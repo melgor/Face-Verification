@@ -34,6 +34,10 @@ struct Configuration
   //Extractor
   std::string  extractorFolder;
   std::string  extractorImageList;
+  //Verification
+  std::string  trainData;
+  std::string  valData;
+  std::string  metric;
 
 
   void read(int argc, char** argv)
@@ -60,6 +64,10 @@ struct Configuration
     //Extractor
     extractorFolder    = pt.get<std::string>("Extract.folder");
     extractorImageList = pt.get<std::string>("Extract.imageListDB");
+    //Verificator
+    trainData       = pt.get<std::string>("Verification.trainData");
+    valData         = pt.get<std::string>("Verification.valData");
+    metric          = pt.get<std::string>("Verification.metric");
 
   }
 

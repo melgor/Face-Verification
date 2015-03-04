@@ -7,9 +7,10 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <boost/algorithm/string.hpp>
 #include "fetureExtractor.hpp"
 #include "utils/serialization.hpp"
-#include <boost/algorithm/string.hpp>
+
 
 using namespace std;
 

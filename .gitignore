@@ -2,3 +2,6 @@ deepface
 *.[oa]
 *.yaml
 *.dat
+*.jpg
+*.txt
+
