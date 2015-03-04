@@ -6,7 +6,9 @@ The aim of the framework is to detect and classify face from images.
 Steps of framework:
   1. Detect face: Done
   2. Face Frontalization: Done
-  3. Face Verification: TODO
+  3. Face Verification: In progesss
+  
+config.ini is example configuration file, need to run program
 
 Dependies:
   - dlib (face detection and detection of facial points)

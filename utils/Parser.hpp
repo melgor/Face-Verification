@@ -14,9 +14,8 @@ public:
 
 	boost::program_options::options_description desc;
 	std::string scene;
-  std::string posemodel;
-  std::string facemodel;
   std::string folderpath;
+  std::string config;
 	bool reset;
 	bool help;
 };

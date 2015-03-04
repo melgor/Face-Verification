@@ -9,6 +9,8 @@
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ini_parser.hpp>
 #include <fstream>
 #include "Parser.hpp"
 #include <memory>
@@ -16,10 +18,22 @@
 struct Configuration
 {
   bool         reset;
+  //mode of program
+  std::string  mode;
+  //input
   std::string  nameScene;
+  std::string  folderpath;
+  //face detection
   std::string  posemodel;
   std::string  facemodel;
-  std::string  folderpath;
+  //Net
+  std::string  prototxt;
+  std::string  caffemodel;
+  bool         gpu;
+  std::string  layer;
+  //Extractor
+  std::string  extractorFolder;
+  std::string  extractorImageList;
 
 
   void read(int argc, char** argv)
@@ -28,10 +42,25 @@ struct Configuration
     parser.read(argc, argv);
 
     reset          = parser.reset;
-    nameScene      = parser.scene;
-    posemodel      = parser.posemodel;
-    facemodel      = parser.facemodel;
+    nameScene      = parser.scene; 
     folderpath     = parser.folderpath;
+    
+    boost::property_tree::ptree pt;
+    boost::property_tree::ini_parser::read_ini(parser.config, pt);
+    //mode 
+    mode           = pt.get<std::string>("Mode.Mode");
+    //face detection
+    posemodel      = pt.get<std::string>("FaceDecetion.PoseModel");
+    facemodel      = pt.get<std::string>("FaceDecetion.FaceModel");
+    //net 
+    prototxt       = pt.get<std::string>("Net.Prototxt");
+    caffemodel     = pt.get<std::string>("Net.CaffeModel");
+    layer          = pt.get<std::string>("Net.Layer");
+    gpu            = pt.get<bool>("Net.GPU");
+    //Extractor
+    extractorFolder    = pt.get<std::string>("Extract.folder");
+    extractorImageList = pt.get<std::string>("Extract.imageListDB");
+
   }
 
   void print()
@@ -39,9 +68,15 @@ struct Configuration
     std::cerr<<"-------------------------------------" << std::endl;
     std::cerr<<"Configuration " << std::endl;
     std::cerr<<"nameScene: "<<nameScene << std::endl;
+    std::cerr<<"folderpath: "<<folderpath << std::endl;
+    std::cerr<<"------------Face Detection----------------" << std::endl;
     std::cerr<<"posemodel: "<<posemodel << std::endl;
     std::cerr<<"facemodel: "<<facemodel << std::endl;
-    std::cerr<<"folderpath: "<<folderpath << std::endl;
+    std::cerr<<"------------Net---------------------------" << std::endl;
+    std::cerr<<"prototxt: "<<prototxt << std::endl;
+    std::cerr<<"caffemodel: "<<caffemodel << std::endl;
+    std::cerr<<"layer: "<<layer << std::endl;
+    std::cerr<<"gpu: "<<gpu << std::endl;
     std::cerr<<"-------------------------------------" << std::endl;
   };
 
@@ -54,64 +89,5 @@ double calcDistance( cv::Point2f p1, cv::Point2f p2);
 // Finds the intersection of two lines, or returns false.
 // The lines are defined by (o1, p1) and (o2, p2).
 bool intersection(cv::Point2f o1, cv::Point2f p1, cv::Point2f o2, cv::Point2f p2);
-
-BOOST_SERIALIZATION_SPLIT_FREE(::cv::Mat)
-namespace boost {
-  namespace serialization {
- 
-    /** Serialization support for cv::Mat */
-    template<class Archive>
-    void save(Archive & ar, const ::cv::Mat& m, const unsigned int version)
-    {
-      size_t elem_size = m.elemSize();
-      size_t elem_type = m.type();
- 
-      ar & m.cols;
-      ar & m.rows;
-      ar & elem_size;
-      ar & elem_type;
- 
-      const size_t data_size = m.cols * m.rows * elem_size;
-      ar & boost::serialization::make_array(m.ptr(), data_size);
-    }
- 
-    /** Serialization support for cv::Mat */
-    template<class Archive>
-    void load(Archive & ar, ::cv::Mat& m, const unsigned int version)
-    {
-      int cols, rows;
-      size_t elem_size, elem_type;
- 
-      ar & cols;
-      ar & rows;
-      ar & elem_size;
-      ar & elem_type;
- 
-      m.create(rows, cols, elem_type);
- 
-      size_t data_size = m.cols * m.rows * elem_size;
-      ar & boost::serialization::make_array(m.ptr(), data_size);
-    }
-
-    // Try read next object from archive
-    template<class Archive, class Stream, class Obj>
-    bool try_stream_next(Archive &ar, const Stream &s, Obj &o)
-    {
-      bool success = false;
-     
-      try {
-        ar >> o;
-        success = true;
-      } catch (const boost::archive::archive_exception &e) {
-        if (e.code != boost::archive::archive_exception::input_stream_error) {
-          throw;
-        }
-      }
-     
-      return success;
-    }
- 
-  }
-}
 
 #endif
