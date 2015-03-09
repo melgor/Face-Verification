@@ -12,6 +12,7 @@
 
 typedef std::vector<cv::Point2f> FacePoints;
 
+//TODO: Add easier Face Aligment algorithm. 
 class FaceAttribute
 {
 public:
@@ -27,9 +28,12 @@ public:
 	~FaceAttribute();
 
 private:
+  //get BB of face, including added Padding (detection rect exlude some parts of face)
+  void getBoundingRect(cv::Rect& imageRect, dlib::rectangle& faceRect, cv::Rect& outRect);
   dlib::frontal_face_detector _frontalFaceDetector;
   dlib::shape_predictor       _poseModel;
-  int _padValue = 40;
+  float                       _padValue;
+  float                       _resizeImageRatio;
 
 };
 

@@ -49,7 +49,6 @@ private:
   int             _calibFlags;
   cv::Mat         _tVec;
   cv::Mat         _rMat;
-  bool            USE_FIND_EXTRINSIC = 1;
   bool            USE_CALIBRATE = 0;
 
 

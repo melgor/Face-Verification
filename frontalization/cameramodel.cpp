@@ -1,8 +1,8 @@
 /* 
 * @Author: melgor
 * @Date:   2015-02-09 10:03:31
-* @Last Modified 2015-02-23
-* @Last Modified time: 2015-02-23 11:14:56
+* @Last Modified 2015-03-06
+* @Last Modified time: 2015-03-06 11:33:34
 */
 
 #include <opencv2/core/core.hpp>
@@ -22,7 +22,10 @@ CameraModel::CameraModel(Configuration& config)
   parseYAML(config.facemodel,_model3D);
   _calibFlags = CV_CALIB_FIX_PRINCIPAL_POINT + CV_CALIB_ZERO_TANGENT_DIST
       + CV_CALIB_FIX_ASPECT_RATIO + CV_CALIB_USE_INTRINSIC_GUESS;
-
+  
+  if(config.calibOption == "STANDARD")
+    USE_CALIBRATE = 1;
+  //else use EXTRINIC
 }
 
 void
@@ -110,7 +113,7 @@ CameraModel::calcCamera(
     _rMat.convertTo(_rMat, CV_32FC1);
     tvecs_vec[0].convertTo(_tVec,CV_32FC1);
   }
-  else if (USE_FIND_EXTRINSIC)
+  else
   {
     Mat rvecs_v = Mat::zeros(3, 1, CV_64F);
     Mat tvecs_v = Mat::zeros(3, 1, CV_64F);

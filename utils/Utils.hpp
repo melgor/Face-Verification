@@ -26,10 +26,15 @@ struct Configuration
   //face detection
   std::string  posemodel;
   std::string  facemodel;
+  float        padDetection;
+  float        resizeImageRatio;
+  std::string  calibOption;
+  bool         symetry;
   //Net
   std::string  prototxt;
   std::string  caffemodel;
   bool         gpu;
+  int          gpuID;
   std::string  layer;
   //Extractor
   std::string  extractorFolder;
@@ -56,11 +61,16 @@ struct Configuration
     //face detection
     posemodel      = pt.get<std::string>("FaceDecetion.PoseModel");
     facemodel      = pt.get<std::string>("FaceDecetion.FaceModel");
+    padDetection   = pt.get<float>("FaceDecetion.PadDetection");
+    resizeImageRatio =  pt.get<float>("FaceDecetion.ResizeImageRatio");
+    calibOption      =  pt.get<std::string>("FaceDecetion.CalibOption");
+    symetry          =  pt.get<bool>("FaceDecetion.Symetry");
     //net 
     prototxt       = pt.get<std::string>("Net.Prototxt");
     caffemodel     = pt.get<std::string>("Net.CaffeModel");
     layer          = pt.get<std::string>("Net.Layer");
     gpu            = pt.get<bool>("Net.GPU");
+    gpuID          = pt.get<int>("Net.GPU_ID");
     //Extractor
     extractorFolder    = pt.get<std::string>("Extract.folder");
     extractorImageList = pt.get<std::string>("Extract.imageListDB");
@@ -77,9 +87,14 @@ struct Configuration
     std::cerr<<"Configuration " << std::endl;
     std::cerr<<"nameScene: "<<nameScene << std::endl;
     std::cerr<<"folderpath: "<<folderpath << std::endl;
+    std::cerr<<"mode: "<<mode << std::endl;
     std::cerr<<"------------Face Detection----------------" << std::endl;
     std::cerr<<"posemodel: "<<posemodel << std::endl;
     std::cerr<<"facemodel: "<<facemodel << std::endl;
+    std::cerr<<"padDetection: "<<padDetection << std::endl;
+    std::cerr<<"ResizeImageRatio: "<<resizeImageRatio << std::endl;
+    std::cerr<<"CalibOption: "<<calibOption << std::endl;
+    std::cerr<<"Symetry: "<<symetry << std::endl;
     std::cerr<<"------------Net---------------------------" << std::endl;
     std::cerr<<"prototxt: "<<prototxt << std::endl;
     std::cerr<<"caffemodel: "<<caffemodel << std::endl;

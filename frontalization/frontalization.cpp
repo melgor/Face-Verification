@@ -1,8 +1,8 @@
 /*
 * @Author: melgor
 * @Date:   2015-02-09 10:09:01
-* @Last Modified 2015-02-23
-* @Last Modified time: 2015-02-23 14:55:08
+* @Last Modified 2015-03-06
+* @Last Modified time: 2015-03-06 12:15:02
 */
 
 #include "frontalization.hpp"
@@ -17,9 +17,9 @@ using namespace cv;
 Frontalization::Frontalization(Configuration& config)
 {
   //create main class
-  _faceatt = new FaceAttribute(config);
-  _camera  = new CameraModel(config);
-
+  _faceatt      = new FaceAttribute(config);
+  _camera       = new CameraModel(config);
+  _applySymetry = config.symetry;
   //init value for Frontalization 
   vector<Mat> channels_refU(3);
   split(abs(_camera->getRefU()), channels_refU);
@@ -311,7 +311,7 @@ Frontalization::frontalize(
 
 
   //Does it help?
-  if (abs(sum_diff) > ACC_CONST)
+  if (abs(sum_diff) > ACC_CONST && _applySymetry)
   {
 
     Mat weights;

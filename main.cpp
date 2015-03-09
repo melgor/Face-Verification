@@ -1,7 +1,7 @@
 /*
 * @Author: melgor
 * @Date:   2014-05-26 22:22:02
-* @Last Modified 2015-03-03
+* @Last Modified 2015-03-09
 */
 #include <chrono>
 #include <iostream>
@@ -55,9 +55,10 @@ int main(int argc, char **argv)
               path_save.push_back(out_path);
               std::cerr << "adding  " << itr->path().string() << std::endl;
               cv::Mat out, image = cv::imread(itr->path().string());
+//               std::vector<cv::Mat> images(1,image), outs;
               front.getFrontalFace(image,out);
-              std::cerr << "save  " << out_path << std::endl;
-              cv::imwrite(out_path,out);
+              if (out.size().width != 0)
+                cv::imwrite(out_path,out);
             }
             ++itr;
           }
@@ -69,13 +70,6 @@ int main(int argc, char **argv)
         std::cerr << p << " patterns path is not a directory\n";
         assert(is_directory(p));
         }
-        // std::vector<cv::Mat> v;
-        // for(auto& p : path)
-        // {
-        //   v.push_back(cv::imread(p));
-        // }
-        // std::vector<cv::Mat> outFrontal;
-        // front.getFrontalFace(v,outFrontal);
       }
       catch (const fs::filesystem_error& ex)
       {
@@ -97,8 +91,8 @@ int main(int argc, char **argv)
       int i = 0;
       for(auto& img : outFrontal)
       {
-      cv::imwrite(std::to_string(i) +  conf.nameScene,img);
-      i++;
+        cv::imwrite(std::to_string(i) +  conf.nameScene,img);
+        i++;
       }
     }
   }

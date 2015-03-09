@@ -20,6 +20,7 @@ public:
 
 private:
   void frontalize(cv::Mat& image, cv::Rect& faceRect, cv::Mat& cameraModel, cv::Mat& outFrontal);
+  bool           _applySymetry;
   FaceAttribute* _faceatt;
   CameraModel*   _camera;
   float          ACC_CONST = 800;

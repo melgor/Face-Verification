@@ -22,6 +22,7 @@ class NetExtractor
     std::string                                       _protoPath;
     std::string                                       _caffeModelPath;
     bool                                              _gpu;
+    int                                               _gpuID;
     std::string                                       _featFromLayer;
     caffe::Net<float>*                                _net;
     caffe::shared_ptr<caffe::MemoryDataLayer<float> > _memoryDataLayer;

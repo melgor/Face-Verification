@@ -1,8 +1,8 @@
 /* 
 * @Author: melgor
 * @Date:   2015-02-09 10:07:08
-* @Last Modified 2015-02-23
-* @Last Modified time: 2015-02-23 15:14:09
+* @Last Modified 2015-03-09
+* @Last Modified time: 2015-03-09 12:57:29
 */
 
 #include "faceattribute.hpp"
@@ -12,9 +12,23 @@
 using namespace std;
 using namespace cv;
 
+//chekc if point are in Rectangle
+bool pointInRect( 
+                 Point& leftTop
+                ,Point& bottomRight
+                ,Rect&  rect
+                )
+{
+
+ return (rect.contains(leftTop) && rect.contains(bottomRight));
+}
+
+
 FaceAttribute::FaceAttribute(Configuration& config)
 {
   _frontalFaceDetector = dlib::get_frontal_face_detector();
+  _padValue            = config.padDetection;
+  _resizeImageRatio    = config.resizeImageRatio;
   dlib::deserialize(config.posemodel) >> _poseModel;
 }
 
@@ -28,18 +42,26 @@ FaceAttribute::detectFaceAndPoint(
   for(auto& img : faces)
   {
     //1.Detect face in image
-    // TODO: Optional resizing of image
-    cv::resize(img, img, cv::Size(), 2, 2, cv::INTER_CUBIC);
+    // Optional resizing of image
+    if (_resizeImageRatio != 1.0)
+      cv::resize(img, img, cv::Size(), _resizeImageRatio,_resizeImageRatio, cv::INTER_CUBIC);
     dlib::cv_image<dlib::bgr_pixel> cimg(img);
     vector<dlib::rectangle> detected_faces = _frontalFaceDetector(cimg);
+    if (!detected_faces.size())
+    {
+      cerr<<"No Face Detected"<<endl;
+      return;
+    }
     //2. For each face detect their facial points
     vector<dlib::full_object_detection> shapes;
-    for (unsigned long i = 0; i < detected_faces.size(); ++i)
+    Rect image_rect(cv::Point(), img.size());
+    for (auto& face_rect : detected_faces)
     {    
         //TODO: add pad only if Rect will be inside of image
-        shapes.push_back(_poseModel(cimg, detected_faces[i]));
-        face_rectangle.push_back(Rect(Point(detected_faces[i].left() -_padValue,detected_faces[i].top() -_padValue) ,
-                                 Point(detected_faces[i].right() + _padValue, detected_faces[i].bottom() + _padValue )) );
+        shapes.push_back(_poseModel(cimg, face_rect));
+        Rect out;
+        getBoundingRect(image_rect,face_rect, out);
+        face_rectangle.push_back( out);
     }
 
     facesPoints.reserve(shapes.size());
@@ -87,6 +109,35 @@ FaceAttribute::detectFacePoint(
       facesPoints.push_back(cv::Point2f(float(shape.part(i).x()), float(shape.part(i).y())));
     }
 
+}
+
+
+void
+FaceAttribute::getBoundingRect(
+                                Rect& imageRect
+                              , dlib::rectangle& faceRect
+                              , Rect& outRect
+                              )
+{
+  float pad_tmp = _padValue;
+  float width_pad  = pad_tmp * (faceRect.right() - faceRect.left());
+  float height_pad = pad_tmp * (faceRect.bottom() - faceRect.top());
+  cerr<<"W: "<< width_pad<<endl;
+  Point left_top     = Point(faceRect.left() - width_pad,faceRect.top() - height_pad);
+  Point right_bottom = Point(faceRect.right() + width_pad, faceRect.bottom() + height_pad );
+                           
+  while(!pointInRect(left_top,right_bottom,imageRect))
+  {
+     pad_tmp -= 0.1;
+     width_pad  = pad_tmp * (faceRect.right() - faceRect.left());
+     height_pad = pad_tmp * (faceRect.bottom() - faceRect.top());
+     cerr<<"W: "<< width_pad<<endl;
+     left_top     = Point(faceRect.left() - width_pad,faceRect.top() - height_pad);
+     right_bottom = Point(faceRect.right() + width_pad, faceRect.bottom() + height_pad );
+
+  }
+
+  outRect = Rect(left_top,right_bottom);
 }
 
 FaceAttribute::~FaceAttribute()

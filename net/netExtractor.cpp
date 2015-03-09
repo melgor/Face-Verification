@@ -1,8 +1,8 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-03 10:56:35
-* @Last Modified 2015-03-03
-* @Last Modified time: 2015-03-03 14:23:07
+* @Last Modified 2015-03-06
+* @Last Modified time: 2015-03-06 08:42:57
 */
 
 #include "netExtractor.hpp"
@@ -16,11 +16,13 @@ NetExtractor::NetExtractor(struct Configuration& config)
   _protoPath       = config.prototxt;
   _caffeModelPath  = config.caffemodel;
   _gpu             = config.gpu;
+  _gpuID           = config.gpuID;
   _featFromLayer   = config.layer;
   
   //init Caffe Net
   if (_gpu)
   {
+    Caffe::SetDevice(_gpuID);
     Caffe::set_mode(Caffe::GPU);
   }
   else
