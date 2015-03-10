@@ -1,12 +1,12 @@
 /*
 * @Author: melgor
 * @Date:   2014-05-26 22:22:02
-* @Last Modified 2015-03-09
+* @Last Modified 2015-03-10
 */
 #include <chrono>
 #include <iostream>
 #include <boost/filesystem.hpp>
-#include "frontalization/frontalization.hpp"
+#include "frontalization/faceextractor.hpp"
 #include "net/fetureExtractor.hpp"
 #include "verification/verification.hpp"
 
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     if (conf.folderpath != "")
     {
       //so far used when in image is only one face, centered for image. Does not run Face Detection Algorithm
-      Frontalization front(conf);
+      FaceExtractor front(conf);
       namespace fs = boost::filesystem;
       fs::path p(conf.folderpath);
       std::vector<string> path;
@@ -81,7 +81,7 @@ int main(int argc, char **argv)
       cv::Mat image = cv::imread(conf.nameScene);
       std::vector<cv::Mat> v(1,image);
       std::vector<cv::Mat> outFrontal;
-      Frontalization front(conf);
+      FaceExtractor front(conf);
       auto t12 = std::chrono::high_resolution_clock::now();
       front.getFrontalFace(v,outFrontal);
       auto t22 = std::chrono::high_resolution_clock::now();

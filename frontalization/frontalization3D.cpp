@@ -1,35 +1,33 @@
 /*
 * @Author: melgor
 * @Date:   2015-02-09 10:09:01
-* @Last Modified 2015-03-06
-* @Last Modified time: 2015-03-06 12:15:02
+* @Last Modified 2015-03-10
+* @Last Modified time: 2015-03-10 11:42:16
 */
 
-#include "frontalization.hpp"
+#include "frontalization3D.hpp"
 #include "utils/MatFunc.cpp"
 #include <vector>
-#include <chrono>
+
 
 using namespace std;
 using namespace cv;
 
 
-Frontalization::Frontalization(Configuration& config)
+Frontalization3D::Frontalization3D(Configuration& config, CameraModel* camera)
 {
   //create main class
-  _faceatt      = new FaceAttribute(config);
-  _camera       = new CameraModel(config);
   _applySymetry = config.symetry;
-  //init value for Frontalization 
+  //init value for Frontalization3D 
   vector<Mat> channels_refU(3);
-  split(abs(_camera->getRefU()), channels_refU);
+  split(abs(camera->getRefU()), channels_refU);
   Mat tmp = channels_refU[0] + channels_refU[1] + channels_refU[2];
   bitwise_and(tmp ,Scalar(0),_bgind);
   _bgindReshape = _bgind.reshape(1,102400);
   _bgindReshape.convertTo(_bgindReshape,CV_8UC1);
 
   //count the number of times each pixel in the query is accessed
-  _threedee = _camera->getRefU().reshape(3,1);
+  _threedee = camera->getRefU().reshape(3,1);
   vector<Mat> splited_threedee;
   split(_threedee,splited_threedee);
   Mat channel_merge_threedee;
@@ -39,110 +37,15 @@ Frontalization::Frontalization(Configuration& config)
   //transform 3 channel to one channel
   tmp = Mat::ones(Size(102400,1),CV_32FC1);
   vconcat(_threedee,tmp,_threedee);
+ 
+  //set outpur crop
+  _centralFace = cv::Rect(105,85,100,152);
+  _eyeMask        = camera->getEyeMask();
+  _cameraRefUSize = camera->getRefU().size();
 }
 
 void
-Frontalization::getFrontalFace(
-                                  vector<Mat>& images
-                                , vector<Mat>& outFrontal
-                              )
-{
-  cerr<<"Face Detection"<< endl;
-  auto t12 = std::chrono::high_resolution_clock::now();
-  vector<FacePoints> face_points;
-  vector<Rect> face_rect;
-  _faceatt->detectFaceAndPoint(images,face_points, face_rect);
-  auto t22 = std::chrono::high_resolution_clock::now();
-
-  std::cout << "detectFacePoint took "
-             << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
-             << " milliseconds\n";
-
-  t12 = std::chrono::high_resolution_clock::now();
-  cerr<<"Camera Model"<<endl;
-  vector<Mat> camera_model(face_points.size(),Mat());
-  vector<Size> imageSizes;
-  for(auto& img : images)
-  {
-    imageSizes.push_back(img.size());
-  }
-  #ifdef __DEBUG
-   //save image with detection
-    Mat cc = images[0].clone();             
-    for(uint i = 0; i <   face_rect.size(); i++)
-    {
-    cv::rectangle(cc,face_rect[i],cv::Scalar::all(255),3);
-    }
-    cv::imwrite("detection.jpg",cc);
-    
-    //save image with facial_points
-    for(uint j = 0; j <   face_rect.size(); j++)
-    {
-      Mat cc = images[0](face_rect[j]).clone();             
-      for(uint i = 0; i <   face_points[j].size(); i++)
-      {
-        cv::circle(cc,face_points[j][i],3,cv::Scalar::all(255),-1);
-      }
-      cv::imwrite( to_string(j) +  "face_point.jpg",cc);  
-    } 
-  #endif
-  _camera->estimateCamera(face_points, imageSizes, camera_model);
-  t22 = std::chrono::high_resolution_clock::now();
-
-  std::cout << "estimateCamera took "
-             << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
-             << " milliseconds\n";
-
-  outFrontal.resize(face_points.size());
-  t12 = std::chrono::high_resolution_clock::now();
-  for(uint i = 0; i < face_points.size(); i++)
-  {
-    frontalize(images[0],face_rect[i],camera_model[i],outFrontal[i]);
-  }
-  t22 = std::chrono::high_resolution_clock::now();
-  std::cout << "frontalize took "
-             << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
-             << " milliseconds\n";
-
-  cerr<<"End"<< endl;
-}
-
-void
-Frontalization::getFrontalFace(
-                                  Mat& images
-                                , Mat& outFrontal)
-{
-  cerr<<"Face Detection"<< endl;
-  auto t12 = std::chrono::high_resolution_clock::now();  
-  FacePoints face_points;
-  _faceatt->detectFacePoint(images,face_points);
-  auto t22 = std::chrono::high_resolution_clock::now();
-  std::cout << "detectFacePoint took "
-             << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
-             << " milliseconds\n";
-  cerr<<"Camera Model"<<endl;
-  t12 = std::chrono::high_resolution_clock::now();
-  Mat camera_model;
-  Size image_sizes = images.size();
-  _camera->estimateCamera(face_points, image_sizes, camera_model);
-  t22 = std::chrono::high_resolution_clock::now();
-  std::cout << "camera took "
-             << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
-             << " milliseconds\n";
-  cerr<<"Frontalization"<<endl;
-  t12 = std::chrono::high_resolution_clock::now();
-  Rect rect_face = Rect(0,0,image_sizes.width-1, image_sizes.height-1);
-  frontalize(images , rect_face, camera_model , outFrontal);
-  t22 = std::chrono::high_resolution_clock::now();
-  std::cout << "frontalize took "
-             << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
-             << " milliseconds\n";
-  cerr<<"End"<< endl;
-}
-
-
-void
-Frontalization::frontalize(
+Frontalization3D::frontalize(
                             Mat& image
                           , Rect& faceRect
                           , Mat& cameraModel
@@ -235,7 +138,7 @@ Frontalization::frontalize(
   }
   // cerr<<"Sum ic: "<< sum_val <<endl;
 
-  Mat synth_frontal_acc = Mat::zeros(_camera->getRefU().size(), CV_32FC1);
+  Mat synth_frontal_acc = Mat::zeros(_cameraRefUSize, CV_32FC1);
   modify<float>(count_ic,synth_frontal_acc,ind_frontal);
   // cerr<<sum(synth_frontal_acc)<<endl;
   //-----------------------------------
@@ -254,10 +157,10 @@ Frontalization::frontalize(
   //Create frontal_raw file
   vector<Mat> channel_photo;
   split(faceImage,channel_photo);
-  vector<Mat> f(3,Mat::zeros(_camera->getRefU().size(),CV_8UC1));
-  Mat f1 = Mat::zeros(_camera->getRefU().size(),CV_8UC1);
-  Mat f2 = Mat::zeros(_camera->getRefU().size(),CV_8UC1);
-  Mat f3 = Mat::zeros(_camera->getRefU().size(),CV_8UC1);
+  vector<Mat> f(3,Mat::zeros(_cameraRefUSize,CV_8UC1));
+  Mat f1 = Mat::zeros(_cameraRefUSize,CV_8UC1);
+  Mat f2 = Mat::zeros(_cameraRefUSize,CV_8UC1);
+  Mat f3 = Mat::zeros(_cameraRefUSize,CV_8UC1);
   // cerr<<"Sum: "<< sum(good_tmp_proj2.col(1)) << sum(good_tmp_proj2.col(0))<<endl;
   remap(channel_photo[0],f[0],good_tmp_proj2.col(0),good_tmp_proj2.col(1),CV_INTER_CUBIC);
   //fill image with value from f[0]
@@ -277,9 +180,9 @@ Frontalization::frontalize(
 
   // which side has more occlusions?
   //sum of synth_frontal_acc column wise
-  int midcolumn =  int(_camera->getRefU().size().height /2);
-  vector<int> sumaccs(_camera->getRefU().size().width,0);
-  for(int i = 0; i < _camera->getRefU().size().width; i++)
+  int midcolumn =  int(_cameraRefUSize.height /2);
+  vector<int> sumaccs(_cameraRefUSize.width,0);
+  for(int i = 0; i < _cameraRefUSize.width; i++)
   {
     //TODO:How to iterate efficienty by columns
     sumaccs[i] = sum(synth_frontal_acc.col(i))[0];
@@ -361,7 +264,7 @@ Frontalization::frontalize(
 
     //Exclude eyes from symmetry
     //Does it help??
-    frontal_raw = frontal_sym.mul((Scalar(1.0f,1.0f,1.0f)-_camera->getEyeMask())) + frontal_raw_f.mul(_camera->getEyeMask());
+    frontal_raw = frontal_sym.mul((Scalar(1.0f,1.0f,1.0f)-_eyeMask)) + frontal_raw_f.mul(_eyeMask);
 
 
   }
@@ -375,8 +278,6 @@ Frontalization::frontalize(
 
 }
 
-Frontalization::~Frontalization()
+Frontalization3D::~Frontalization3D()
 {
- delete _faceatt;
- delete _camera;
 }
