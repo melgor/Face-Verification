@@ -1,7 +1,7 @@
 /*
 * @Author: melgor
 * @Date:   2014-05-27 17:08:52
-* @Last Modified 2015-02-06
+* @Last Modified 2015-03-11
 */
 
 #include <boost/filesystem.hpp>
@@ -140,3 +140,16 @@ intersection(cv::Point2f o1, cv::Point2f p1, cv::Point2f o2, cv::Point2f p2)
     std::cerr<<o1<<p1<<o2<<p2<<std::endl;
     return true;
 }
+
+void 
+calculateMeanPoint( std::vector<cv::Point2f>& points, cv::Point2f& mean_point)
+{
+  for(auto& point : points)
+  {
+    mean_point.x += point.x;
+    mean_point.y += point.y;
+  }
+  mean_point.x /= points.size();
+  mean_point.y /= points.size();
+}
+

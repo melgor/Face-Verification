@@ -14,6 +14,7 @@
 #include <fstream>
 #include "Parser.hpp"
 #include <memory>
+#include "opencv2/opencv.hpp"
 
 struct Configuration
 {
@@ -30,6 +31,7 @@ struct Configuration
   float        resizeImageRatio;
   std::string  calibOption;
   bool         symetry;
+  std::string  model2D;
   //Net
   std::string  prototxt;
   std::string  caffemodel;
@@ -43,6 +45,7 @@ struct Configuration
   std::string  trainData;
   std::string  valData;
   std::string  metric;
+
 
 
   void read(int argc, char** argv)
@@ -65,6 +68,7 @@ struct Configuration
     resizeImageRatio =  pt.get<float>("FaceDecetion.ResizeImageRatio");
     calibOption      =  pt.get<std::string>("FaceDecetion.CalibOption");
     symetry          =  pt.get<bool>("FaceDecetion.Symetry");
+    model2D          =  pt.get<std::string>("FaceDecetion.Model2D");
     //net 
     prototxt       = pt.get<std::string>("Net.Prototxt");
     caffemodel     = pt.get<std::string>("Net.CaffeModel");
@@ -95,6 +99,7 @@ struct Configuration
     std::cerr<<"ResizeImageRatio: "<<resizeImageRatio << std::endl;
     std::cerr<<"CalibOption: "<<calibOption << std::endl;
     std::cerr<<"Symetry: "<<symetry << std::endl;
+    std::cerr<<"Model2D: "<<model2D << std::endl;
     std::cerr<<"------------Net---------------------------" << std::endl;
     std::cerr<<"prototxt: "<<prototxt << std::endl;
     std::cerr<<"caffemodel: "<<caffemodel << std::endl;
@@ -112,5 +117,24 @@ double calcDistance( cv::Point2f p1, cv::Point2f p2);
 // Finds the intersection of two lines, or returns false.
 // The lines are defined by (o1, p1) and (o2, p2).
 bool intersection(cv::Point2f o1, cv::Point2f p1, cv::Point2f o2, cv::Point2f p2);
+
+void calculateMeanPoint(std::vector<cv::Point2f>& points, cv::Point2f& mean_point);
+
+template<class T>
+void savePoints(std::string& name, std::vector<T>& points)
+{
+   cv::FileStorage fs(name, cv::FileStorage::WRITE);
+   write( fs , "points", points );
+   fs.release();
+}
+
+template<class T>
+void  loadPoints(std::string& name, std::vector<T>& points)
+{
+  cv::FileStorage fs2(name, cv::FileStorage::READ);
+  cv::FileNode kptFileNode = fs2["points"];
+  read( kptFileNode, points );
+  fs2.release();
+}
 
 #endif

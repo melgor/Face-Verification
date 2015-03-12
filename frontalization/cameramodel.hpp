@@ -1,7 +1,5 @@
 #ifndef FRONT_CAMERA_MODEL_HPP
 #define FRONT_CAMERA_MODEL_HPP
-// Camera is a model, which transform rotated, translated face to better coordiante system
-// It use face attributes for calculating transformation matrix.
 #include "faceattribute.hpp"
 #include "utils/parseYAML.hpp"
 ///Model of reference face. Name same like in MatLab
@@ -14,7 +12,8 @@
 //   std::vector<cv::Point3f>      threedee;
 // };
 
-
+// Camera is a model, which transform rotated, translated face to better coordiante system. It use reference 3D points
+// It use face attributes for calculating transformation matrix.
 
 class CameraModel
 {

@@ -96,5 +96,72 @@ int main(int argc, char **argv)
       }
     }
   }
+  else if (conf.mode == "create_model")
+  {
+      std::cerr<<"Create model 2D"<<endl;
+      cv::Mat image = cv::imread(conf.nameScene);
+      FaceAttribute faceAtt(conf);
+      std::vector<cv::Mat> v(1,image);
+      std::vector<FacePoints> face_points;
+      std::vector<cv::Rect> rect;
+      faceAtt.detectFaceAndPoint(v, face_points, rect);
+      std::cerr<<image.size() << " "<< rect[0] << std::endl;
+      cv::Mat cc = v[0](rect[0]).clone();
+      std::vector<int> values_point;
+      std::vector<int> left_eye;
+      std::vector<int> right_eye;
+      //nose
+      values_point.push_back(30);
+      //left eye
+      left_eye.push_back(36);
+      left_eye.push_back(37);
+      left_eye.push_back(38);
+      left_eye.push_back(39);
+      left_eye.push_back(40);
+      left_eye.push_back(41);
+      //right eye
+      right_eye.push_back(42);
+      right_eye.push_back(43);
+      right_eye.push_back(44);
+      right_eye.push_back(45);
+      right_eye.push_back(46);
+      right_eye.push_back(47);
+      //left mouth
+      values_point.push_back(48);
+      //right mouth
+      values_point.push_back(54);
+      //middle mouth
+      values_point.push_back(62);
+      
+      std::vector<cv::Point2f> point_model;
+
+      for(auto& elem : values_point)
+      { 
+        point_model.push_back(face_points[0][elem]);
+  //       cv::Mat cct = cc.clone();
+  //       cv::circle(cct,face_points[0][elem],3,cv::Scalar::all(255),-1);
+  //       cv::imwrite(std::to_string(elem) + "facepoint.jpg",cct);
+
+      }
+      std::vector<cv::Point2f> left_eye_model;
+      for(auto& elem : left_eye)
+      {
+        left_eye_model.push_back(face_points[0][elem]);
+      }
+      std::vector<cv::Point2f> right_eye_model;
+      for(auto& elem : right_eye)
+      {
+        right_eye_model.push_back(face_points[0][elem]);
+      }
+      //calculate mean_point using eye_model
+      cv::Point2f center_left_eye, center_right_eye;
+      calculateMeanPoint(left_eye_model,center_left_eye);
+      calculateMeanPoint(right_eye_model,center_right_eye);
+      
+      point_model.push_back(center_left_eye);
+      point_model.push_back(center_right_eye);
+      std::string name = "model2d.xml";
+      savePoints(name,point_model);
+  }
   return 0;
 }

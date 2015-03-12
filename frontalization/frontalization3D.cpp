@@ -46,8 +46,7 @@ Frontalization3D::Frontalization3D(Configuration& config, CameraModel* camera)
 
 void
 Frontalization3D::frontalize(
-                            Mat& image
-                          , Rect& faceRect
+                            Mat& faceImage
                           , Mat& cameraModel
                           , Mat& outFrontal
                           )
@@ -69,7 +68,6 @@ Frontalization3D::frontalize(
 
   // cameraMatlab.convertTo(cameraMatlab,CV_32FC1);
 
-  Mat faceImage = image(faceRect);
   Mat tmp;
   Mat tmp_proj =  _threedee.t() * cameraModel.t();
   Mat tmp_proj2 = tmp_proj.colRange(0,2).clone();
