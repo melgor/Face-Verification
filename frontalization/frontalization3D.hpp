@@ -14,7 +14,7 @@ class Frontalization3D
 {
 public:
   Frontalization3D(Configuration& config, CameraModel* camera);
-  void frontalize(cv::Mat& faceImage, cv::Mat& cameraModel, cv::Mat& outFrontal);
+  void frontalize(cv::Mat& faceImage, cv::Mat& cameraModel, cv::Mat& outFrontal);//, cv::Rect& rect);
   ~Frontalization3D();
 
 private:

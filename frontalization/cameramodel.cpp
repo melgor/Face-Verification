@@ -1,8 +1,8 @@
 /* 
 * @Author: melgor
 * @Date:   2015-02-09 10:03:31
-* @Last Modified 2015-03-06
-* @Last Modified time: 2015-03-06 11:33:34
+* @Last Modified 2015-03-17
+* @Last Modified time: 2015-03-17 17:55:32
 */
 
 #include <opencv2/core/core.hpp>
@@ -37,7 +37,7 @@ CameraModel::estimateCamera(
 {
    for(uint i = 0; i < facesPoints.size(); i++)
    {
-    doCalib(facesPoints[i], imageSize[0], cameraModels[i]);
+    doCalib(facesPoints[i], imageSize[0], cameraModels[i],i);
    }
 }
 
@@ -48,7 +48,7 @@ CameraModel::estimateCamera(
                             , Mat& cameraModels
                             )
 {
-  doCalib(facesPoints, imageSize,cameraModels);
+  doCalib(facesPoints, imageSize,cameraModels,0);
 }
 
 void
@@ -56,9 +56,10 @@ CameraModel::doCalib(
                       FacePoints& facesPoints
                     , Size& imageSize
                     , Mat& model
+                    , int idx
                     )
 {
-  calcCamera(facesPoints,model);
+  calcCamera(facesPoints,model,idx);
   // int i = calcInside(model,_rMat,_tVec, imageSize);
   //TODO: it does not work. Check with MatLab
   // if (i == 0)
@@ -91,10 +92,17 @@ CameraModel::getEyeMask()
   return _model3D.eyeMask;
 }
 
+vector<Point2f> 
+CameraModel::getRefXY()
+{
+  return _model3D.ref_XY;
+}
+
 void
 CameraModel::calcCamera(
                           FacePoints& facesPoints
                         , Mat& model
+                        , int idx
                         )
 {
   Mat distCoeffs = Mat::zeros(4, 1, CV_64F);
@@ -124,7 +132,7 @@ CameraModel::calcCamera(
   }
 
   model.convertTo(model, CV_32FC1);
-
+  cerr<<"Camera: "<<model<<endl;
 }
 
 int

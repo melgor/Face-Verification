@@ -1,19 +1,19 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-11 17:00:34
-* @Last Modified 2015-03-11
-* @Last Modified time: 2015-03-11 17:25:20
+* @Last Modified 2015-03-17
+* @Last Modified time: 2015-03-17 18:04:51
 */
-#include "homographymodel.hpp"
+#include "affinemodel.hpp"
 #include <opencv2/calib3d/calib3d.hpp>
 
 using namespace std;
 using namespace cv;
 
-HomographyModel::HomographyModel(Configuration& config)
+AffineModel::AffineModel(Configuration& config)
 {
-  loadPoints(config.model2D,_pointModel);
-  
+  loadPoints(config.model2D_6,_pointModel6);
+  loadPoints(config.model2D_68,_pointModel68);
   //nose
   _idPoints.push_back(30);
   //left mouth
@@ -41,7 +41,7 @@ HomographyModel::HomographyModel(Configuration& config)
 
 
 void
-HomographyModel::estimateCamera(
+AffineModel::estimateCamera(
                               vector<FacePoints>& facesPoints
                             , vector<Size>& imageSize
                             , vector<Mat>& cameraModels
@@ -54,14 +54,14 @@ HomographyModel::estimateCamera(
 }
 
 void 
-HomographyModel::estimateCamera(
+AffineModel::estimateCamera(
                         FacePoints& facesPoints,
                         cv::Size& imageSize,
                         cv::Mat& cameraModels
                         )
 {
   //1. Extract right point from 
-  FacePoints face_point_for_homo(_pointModel.size());
+  FacePoints face_point_for_homo(_pointModel6.size());
   int i = 0;
   for(auto& point : _idPoints)
   {
@@ -84,11 +84,15 @@ HomographyModel::estimateCamera(
   calculateMeanPoint(right_eye_model,center_right_eye);
   face_point_for_homo[i] = center_left_eye;
   face_point_for_homo[i+1] = center_right_eye;
+  //get Transformation Matrix
 
-  cameraModels = findHomography(face_point_for_homo, _pointModel, CV_RANSAC );
+  cameraModels = estimateRigidTransform(face_point_for_homo, _pointModel6, 0 );
+  // if (cameraModels.empty())
+  //   cameraModels = estimateRigidTransform(face_point_for_homo, _pointModel6, 1 );
+  // cameraModels = findHomography(face_point_for_homo, _pointModel6, 0 );
 }                        
 
-HomographyModel::~HomographyModel()
+AffineModel::~AffineModel()
 {
 
 }

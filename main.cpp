@@ -1,7 +1,7 @@
 /*
 * @Author: melgor
 * @Date:   2014-05-26 22:22:02
-* @Last Modified 2015-03-10
+* @Last Modified 2015-03-13
 */
 #include <chrono>
 #include <iostream>
@@ -55,10 +55,10 @@ int main(int argc, char **argv)
               path_save.push_back(out_path);
               std::cerr << "adding  " << itr->path().string() << std::endl;
               cv::Mat out, image = cv::imread(itr->path().string());
-//               std::vector<cv::Mat> images(1,image), outs;
-              front.getFrontalFace(image,out);
-              if (out.size().width != 0)
-                cv::imwrite(out_path,out);
+              std::vector<cv::Mat> images(1,image), outs;
+              front.getFrontalFace(images,outs);
+              if (outs[0].size().width != 0)
+                cv::imwrite(out_path,outs[0]);
             }
             ++itr;
           }
@@ -133,11 +133,11 @@ int main(int argc, char **argv)
       //middle mouth
       values_point.push_back(62);
       
-      std::vector<cv::Point2f> point_model;
+      std::vector<cv::Point2f> point_model_6,point_model_68;
 
       for(auto& elem : values_point)
       { 
-        point_model.push_back(face_points[0][elem]);
+        point_model_6.push_back(face_points[0][elem]);
   //       cv::Mat cct = cc.clone();
   //       cv::circle(cct,face_points[0][elem],3,cv::Scalar::all(255),-1);
   //       cv::imwrite(std::to_string(elem) + "facepoint.jpg",cct);
@@ -153,15 +153,23 @@ int main(int argc, char **argv)
       {
         right_eye_model.push_back(face_points[0][elem]);
       }
+      //collect all 68 points
+      for(auto& elem : face_points[0])
+      {
+        point_model_68.push_back(elem);
+      }
       //calculate mean_point using eye_model
       cv::Point2f center_left_eye, center_right_eye;
       calculateMeanPoint(left_eye_model,center_left_eye);
       calculateMeanPoint(right_eye_model,center_right_eye);
       
-      point_model.push_back(center_left_eye);
-      point_model.push_back(center_right_eye);
-      std::string name = "model2d.xml";
-      savePoints(name,point_model);
+      point_model_6.push_back(center_left_eye);
+      point_model_6.push_back(center_right_eye);
+      std::string name = "model2d_6poinst.xml";
+      savePoints(name,point_model_6);
+      name = "model2d_68poinst.xml";
+      savePoints(name,point_model_68);
+      
   }
   return 0;
 }

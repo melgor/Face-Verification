@@ -31,7 +31,8 @@ struct Configuration
   float        resizeImageRatio;
   std::string  calibOption;
   bool         symetry;
-  std::string  model2D;
+  std::string  model2D_6;
+  std::string  model2D_68;
   //Net
   std::string  prototxt;
   std::string  caffemodel;
@@ -68,7 +69,8 @@ struct Configuration
     resizeImageRatio =  pt.get<float>("FaceDecetion.ResizeImageRatio");
     calibOption      =  pt.get<std::string>("FaceDecetion.CalibOption");
     symetry          =  pt.get<bool>("FaceDecetion.Symetry");
-    model2D          =  pt.get<std::string>("FaceDecetion.Model2D");
+    model2D_6        =  pt.get<std::string>("FaceDecetion.Model2D_6points");
+    model2D_68       =  pt.get<std::string>("FaceDecetion.Model2D_68points");
     //net 
     prototxt       = pt.get<std::string>("Net.Prototxt");
     caffemodel     = pt.get<std::string>("Net.CaffeModel");
@@ -99,7 +101,8 @@ struct Configuration
     std::cerr<<"ResizeImageRatio: "<<resizeImageRatio << std::endl;
     std::cerr<<"CalibOption: "<<calibOption << std::endl;
     std::cerr<<"Symetry: "<<symetry << std::endl;
-    std::cerr<<"Model2D: "<<model2D << std::endl;
+    std::cerr<<"Model2D_6: "<<model2D_6 << std::endl;
+    std::cerr<<"Model2D_68: "<<model2D_68 << std::endl;
     std::cerr<<"------------Net---------------------------" << std::endl;
     std::cerr<<"prototxt: "<<prototxt << std::endl;
     std::cerr<<"caffemodel: "<<caffemodel << std::endl;
@@ -119,6 +122,8 @@ double calcDistance( cv::Point2f p1, cv::Point2f p2);
 bool intersection(cv::Point2f o1, cv::Point2f p1, cv::Point2f o2, cv::Point2f p2);
 
 void calculateMeanPoint(std::vector<cv::Point2f>& points, cv::Point2f& mean_point);
+
+float rectIntersection(cv::Rect& r1, cv::Rect& r2);
 
 template<class T>
 void savePoints(std::string& name, std::vector<T>& points)

@@ -1,8 +1,8 @@
 /*
 * @Author: melgor
 * @Date:   2015-02-09 10:09:01
-* @Last Modified 2015-03-10
-* @Last Modified time: 2015-03-10 11:42:16
+* @Last Modified 2015-03-13
+* @Last Modified time: 2015-03-13 15:29:58
 */
 
 #include "frontalization3D.hpp"
@@ -49,6 +49,7 @@ Frontalization3D::frontalize(
                             Mat& faceImage
                           , Mat& cameraModel
                           , Mat& outFrontal
+                          //, Rect& rect
                           )
 {
   //this matrix is from same image from MatLab fot test image
@@ -67,7 +68,7 @@ Frontalization3D::frontalize(
   // cameraMatlab.at<double>(2,3) = 7.730182790263748e+02;
 
   // cameraMatlab.convertTo(cameraMatlab,CV_32FC1);
-
+  // Mat faceImage = image(rect);
   Mat tmp;
   Mat tmp_proj =  _threedee.t() * cameraModel.t();
   Mat tmp_proj2 = tmp_proj.colRange(0,2).clone();
@@ -82,7 +83,7 @@ Frontalization3D::frontalize(
 
   Mat good_tmp_proj2;
   MatConstIterator_<uchar> it_bad = bad.begin<uchar>(), it_bad_end = bad.end<uchar>();
-  int row = 0;
+  int row = 0, good_id = 0;
   vector<int> ind_frontal;
   for(MatConstIterator_<uchar> j = it_bad; j != it_bad_end ;++j)
   {
@@ -91,10 +92,16 @@ Frontalization3D::frontalize(
       //TODO: how to iterate to take all row?
       good_tmp_proj2.push_back(tmp_proj2.row(row));
       ind_frontal.push_back( row );
+      good_id++;
      }
      row++;
   }
-
+  if(!good_id)
+  {
+    cerr<<"Can not Frontalize"<<endl;
+    outFrontal = Mat::zeros(Size(100,100),CV_8UC3);
+    return;
+  }
   Mat good_16;
   good_tmp_proj2.convertTo(good_16,CV_16SC1);
   vector<int> ind = Sub2Ind<short>(faceImage.size().width,faceImage.size().height,good_16.col(1),good_16.col(0));

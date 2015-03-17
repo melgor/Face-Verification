@@ -4,7 +4,7 @@
 #include "faceattribute.hpp"
 #include "cameramodel.hpp"
 #include "frontalization3D.hpp"
-#include "homographymodel.hpp"
+#include "affinemodel.hpp"
 
 //Class for controling all flow of face Aligment
 class FaceExtractor
@@ -19,8 +19,8 @@ public:
 private:
   FaceAttribute*    _faceatt;
   CameraModel*      _camera;
-  Frontalization3D*  _align;
-  HomographyModel*  _homo;
+  Frontalization3D* _align;
+  AffineModel*      _affine;
   std::string       _alignOption;
 };
 

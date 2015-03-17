@@ -1,8 +1,8 @@
 /* 
 * @Author: melgor
 * @Date:   2015-02-09 10:07:08
-* @Last Modified 2015-03-10
-* @Last Modified time: 2015-03-10 11:56:28
+* @Last Modified 2015-03-13
+* @Last Modified time: 2015-03-13 13:00:50
 */
 
 #include "faceattribute.hpp"
@@ -52,11 +52,22 @@ FaceAttribute::detectFaceAndPoint(
       cerr<<"No Face Detected"<<endl;
       return;
     }
+    else
+    {
+      // cerr<<"Detected: "<< detected_faces.size() << endl;
+    }
     //2. For each face detect their facial points
     vector<dlib::full_object_detection> shapes;
     Rect image_rect(cv::Point(), img.size());
     for (auto& face_rect : detected_faces)
     {    
+        Rect face_cv(cv::Point(face_rect.left(),face_rect.top()),cv::Point(face_rect.right(),face_rect.bottom()));
+        // cerr<<"Intersection: "<< rectIntersection(image_rect,face_cv)<<endl;
+        if(rectIntersection(image_rect,face_cv) != 1.0)
+        {
+          //rectangle is outside image
+          continue;
+        }
         //TODO: add pad only if Rect will be inside of image
         shapes.push_back(_poseModel(cimg, face_rect));
         Rect out;
@@ -122,21 +133,20 @@ FaceAttribute::getBoundingRect(
   float pad_tmp = _padValue;
   float width_pad  = pad_tmp * (faceRect.right() - faceRect.left());
   float height_pad = pad_tmp * (faceRect.bottom() - faceRect.top());
-  cerr<<"W: "<< width_pad<<endl;
+ 
   Point left_top     = Point(faceRect.left() - width_pad,faceRect.top() - height_pad);
   Point right_bottom = Point(faceRect.right() + width_pad, faceRect.bottom() + height_pad );
-                           
-  while(!pointInRect(left_top,right_bottom,imageRect))
+  // cerr<<"W: "<< width_pad <<"   "<< imageRect <<"  "<< left_top << "    "<< right_bottom <<endl;                             
+  while(!pointInRect(left_top,right_bottom,imageRect) && width_pad > 0.0)
   {
      pad_tmp -= 0.1;
      width_pad  = pad_tmp * (faceRect.right() - faceRect.left());
      height_pad = pad_tmp * (faceRect.bottom() - faceRect.top());
-     cerr<<"W: "<< width_pad<<endl;
      left_top     = Point(faceRect.left() - width_pad,faceRect.top() - height_pad);
      right_bottom = Point(faceRect.right() + width_pad, faceRect.bottom() + height_pad );
-
+     // cerr<<"W: "<< width_pad <<"   "<< imageRect <<"  "<< left_top << "    "<< right_bottom <<endl; 
   }
-
+  cerr<<"W: "<< width_pad <<"   "<< imageRect <<"  "<< left_top << "    "<< right_bottom <<endl; 
   outRect = Rect(left_top,right_bottom);
 }
 

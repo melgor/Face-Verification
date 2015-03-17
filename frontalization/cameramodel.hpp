@@ -20,10 +20,10 @@ class CameraModel
 public:
   CameraModel  (Configuration& config);
 	void estimateCamera(
-												std::vector<FacePoints>& facesPoints,
+                        std::vector<FacePoints>& facesPoints,
                         std::vector<cv::Size>& imageSize,
-												std::vector<cv::Mat>& cameraModels
-												);
+                        std::vector<cv::Mat>& cameraModels
+                       );
   void estimateCamera(
                         FacePoints& facesPoints,
                         cv::Size& imageSize,
@@ -31,12 +31,13 @@ public:
                         );
   cv::Mat& getRefU();
   cv::Mat& getEyeMask();
+  std::vector<cv::Point2f> getRefXY();
   ~CameraModel();
 
 private:
   //compute pose using reference 3D points + query 2D points
-  void    doCalib( FacePoints& facesPoints, cv::Size& imageSize ,cv::Mat& model);
-  void    calcCamera( FacePoints& facesPoints,cv::Mat& model );
+  void    doCalib( FacePoints& facesPoints, cv::Size& imageSize ,cv::Mat& model,int idx);
+  void    calcCamera( FacePoints& facesPoints,cv::Mat& model,int idx );
   int     calcInside(  cv::Mat& A, cv::Mat& R, cv::Mat& T
                         ,cv::Size& size);
   cv::Mat extractFrustum(cv::Mat& A,cv::Mat&  R, cv::Mat& T, cv::Size& size);
@@ -49,7 +50,6 @@ private:
   cv::Mat         _tVec;
   cv::Mat         _rMat;
   bool            USE_CALIBRATE = 0;
-
 
 };
 

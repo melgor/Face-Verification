@@ -1,7 +1,7 @@
 /*
 * @Author: melgor
 * @Date:   2014-05-27 17:08:52
-* @Last Modified 2015-03-11
+* @Last Modified 2015-03-13
 */
 
 #include <boost/filesystem.hpp>
@@ -151,5 +151,14 @@ calculateMeanPoint( std::vector<cv::Point2f>& points, cv::Point2f& mean_point)
   }
   mean_point.x /= points.size();
   mean_point.y /= points.size();
+}
+
+float 
+rectIntersection(cv::Rect& r1, cv::Rect& r2)
+{
+  cv::Rect rect_over = r1 & r2;
+  // cv::Rect rect_min = r1 | r2;
+  std::cerr<<r1 << "  "<< r2 <<"  "<< rect_over << std::endl;
+  return rect_over.area()/float(r2.area());
 }
 
