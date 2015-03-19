@@ -1,10 +1,10 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-11 17:00:34
-* @Last Modified 2015-03-17
-* @Last Modified time: 2015-03-17 18:04:51
+* @Last Modified 2015-03-19
+* @Last Modified time: 2015-03-19 11:56:28
 */
-#include "affinemodel.hpp"
+#include "AffineModel.hpp"
 #include <opencv2/calib3d/calib3d.hpp>
 
 using namespace std;
@@ -55,10 +55,10 @@ AffineModel::estimateCamera(
 
 void 
 AffineModel::estimateCamera(
-                        FacePoints& facesPoints,
-                        cv::Size& imageSize,
-                        cv::Mat& cameraModels
-                        )
+                            FacePoints& facesPoints,
+                            cv::Size& imageSize,
+                            cv::Mat& cameraModels
+                            )
 {
   //1. Extract right point from 
   FacePoints face_point_for_homo(_pointModel6.size());
@@ -90,7 +90,19 @@ AffineModel::estimateCamera(
   // if (cameraModels.empty())
   //   cameraModels = estimateRigidTransform(face_point_for_homo, _pointModel6, 1 );
   // cameraModels = findHomography(face_point_for_homo, _pointModel6, 0 );
-}                        
+}              
+
+FacePoints& 
+AffineModel::getModel6()
+{
+  return _pointModel6;
+}
+
+FacePoints& 
+AffineModel::getModel68()
+{
+  return _pointModel68;
+}            
 
 AffineModel::~AffineModel()
 {

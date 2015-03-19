@@ -42,10 +42,13 @@ struct Configuration
   //Extractor
   std::string  extractorFolder;
   std::string  extractorImageList;
+  bool         scaleFeature;
   //Verification
   std::string  trainData;
   std::string  valData;
   std::string  metric;
+  std::string  pathComparatorChi;
+  float        thresholdChi;
 
 
 
@@ -78,13 +81,15 @@ struct Configuration
     gpu            = pt.get<bool>("Net.GPU");
     gpuID          = pt.get<int>("Net.GPU_ID");
     //Extractor
-    extractorFolder    = pt.get<std::string>("Extract.folder");
-    extractorImageList = pt.get<std::string>("Extract.imageListDB");
+    extractorFolder    = pt.get<std::string>("Extract.Folder");
+    extractorImageList = pt.get<std::string>("Extract.ImageListDB");
+    scaleFeature       = pt.get<bool>("Extract.ScaleFeature");
     //Verificator
-    trainData       = pt.get<std::string>("Verification.trainData");
-    valData         = pt.get<std::string>("Verification.valData");
-    metric          = pt.get<std::string>("Verification.metric");
-
+    trainData         = pt.get<std::string>("Verification.TrainData");
+    valData           = pt.get<std::string>("Verification.ValData");
+    metric            = pt.get<std::string>("Verification.Metric");
+    pathComparatorChi = pt.get<std::string>("Verification.ChiPath");
+    thresholdChi      = pt.get<float>("Verification.ChiThres");
   }
 
   void print()

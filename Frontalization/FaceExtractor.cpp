@@ -1,12 +1,12 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-10 11:14:56
-* @Last Modified 2015-03-17
-* @Last Modified time: 2015-03-17 18:06:08
+* @Last Modified 2015-03-19
+* @Last Modified time: 2015-03-19 11:58:09
 */
 
-#include "faceextractor.hpp"
-#include "frontalization3D.hpp"
+#include "FaceExtractor.hpp"
+#include "Frontalization3D.hpp"
 #include <chrono>
 
 using namespace std;
@@ -111,11 +111,11 @@ FaceExtractor::getFrontalFace(
     for(uint j = 0; j <   face_points_align[i].size(); j++)
     {
       cv::circle(cc,face_points_align[i][j],3,cv::Scalar::all(255),-1);
-      cv::circle(cc,_homo->_pointModel68[j],3,cv::Scalar::all(0),-1);
+      cv::circle(cc,_affine->getModel68()[j],3,cv::Scalar::all(0),-1);
     }
     for(uint j = 0; j <   6; j++)
     {
-      cv::circle(cc,_homo->_pointModel6[j],3,cv::Scalar::all(0),-1);
+      cv::circle(cc,_affine->getModel6()[j],3,cv::Scalar::all(0),-1);
     }
     cv::imwrite("homo_2.jpg",cc);
     #endif

@@ -1,15 +1,15 @@
 /*
 * @Author: melgor
 * @Date:   2014-05-26 22:22:02
-* @Last Modified 2015-03-13
+* @Last Modified 2015-03-18
 */
 #include <chrono>
 #include <iostream>
 #include <boost/filesystem.hpp>
-#include "frontalization/faceextractor.hpp"
-#include "net/fetureExtractor.hpp"
-#include "verification/verification.hpp"
-
+#include "Frontalization/FaceExtractor.hpp"
+#include "Net/FetureExtractor.hpp"
+#include "Verification/Verification.hpp"
+#include "Verification/ChiDistance.hpp"
 
 using namespace std;
 int main(int argc, char **argv)
@@ -27,8 +27,16 @@ int main(int argc, char **argv)
   else if(conf.mode == "verify")
   {
     cout<<"Verify"<<endl;
-    Verificator verif(conf);
-    verif.verifyValPerson();
+    // Verificator verif(conf);
+    // verif.verifyValPerson();
+    ChiDistance chid_dist(conf);
+    chid_dist.verifyVal();
+  }
+  else if(conf.mode == "train")
+  {
+    ChiDistance chid_dist(conf);
+    chid_dist.train();
+
   }
   else if(conf.mode == "detect")
   {

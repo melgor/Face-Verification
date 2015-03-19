@@ -8,7 +8,7 @@ LDFLAGS=-L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -lopenc
 		-L/usr/local/cuda/lib64 -L/usr/local/cuda/lib -lcudart -lcublas -lcurand -ltbb -lboost_filesystem -lboost_system -lboost_program_options -lopencv_ml \
 		-lboost_serialization -lboost_iostreams -L/home/blcv/CODE/Face_LIB/dlib-18.12/examples/build/dlib_build/ -ldlib -lpthread  \
 		 -L /home/blcv/LIB/yaml-cpp-0.5.1/ -lyaml-cpp -L/home/blcv/LIB/caffe_bn/build/lib/ -lcaffe -lproto
-SOURCES=${wildcard *.cpp frontalization/*.cpp utils/*.cpp net/*.cpp verification/*.cpp}
+SOURCES=${wildcard *.cpp Frontalization/*.cpp Utils/*.cpp Net/*.cpp Verification/*.cpp}
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=deepface
 

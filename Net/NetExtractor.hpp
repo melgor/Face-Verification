@@ -3,7 +3,7 @@
 #include "caffe/caffe.hpp"
 #include "caffe/util/io.hpp"
 #include "caffe/blob.hpp"
-#include "utils/Utils.hpp"
+#include "Utils/Utils.hpp"
 
 //interface for Caffe Net
 

@@ -1,11 +1,11 @@
 /* 
 * @Author: melgor
 * @Date:   2015-02-09 10:07:08
-* @Last Modified 2015-03-13
-* @Last Modified time: 2015-03-13 13:00:50
+* @Last Modified 2015-03-19
+* @Last Modified time: 2015-03-19 11:57:45
 */
 
-#include "faceattribute.hpp"
+#include "FaceAttribute.hpp"
 #include <dlib/opencv.h>
 
 
@@ -62,15 +62,15 @@ FaceAttribute::detectFaceAndPoint(
     for (auto& face_rect : detected_faces)
     {    
         Rect face_cv(cv::Point(face_rect.left(),face_rect.top()),cv::Point(face_rect.right(),face_rect.bottom()));
+        Rect out;
         // cerr<<"Intersection: "<< rectIntersection(image_rect,face_cv)<<endl;
         if(rectIntersection(image_rect,face_cv) != 1.0)
         {
           //rectangle is outside image
           continue;
         }
-        //TODO: add pad only if Rect will be inside of image
         shapes.push_back(_poseModel(cimg, face_rect));
-        Rect out;
+        //add pad only if Rect will be inside of image
         getBoundingRect(image_rect,face_rect, out);
         face_rectangle.push_back( out);
     }

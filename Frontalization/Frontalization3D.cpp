@@ -1,12 +1,12 @@
 /*
 * @Author: melgor
 * @Date:   2015-02-09 10:09:01
-* @Last Modified 2015-03-13
-* @Last Modified time: 2015-03-13 15:29:58
+* @Last Modified 2015-03-19
+* @Last Modified time: 2015-03-19 11:58:31
 */
 
-#include "frontalization3D.hpp"
-#include "utils/MatFunc.cpp"
+#include "Frontalization3D.hpp"
+#include "Utils/MatFunc.cpp"
 #include <vector>
 
 
@@ -206,9 +206,6 @@ Frontalization3D::frontalize(
 
   int sum_diff = sum_left - sum_right;
 
-  ///----Apply symetry transfrom if one side of face is more ocludded------
-  ///----Occlusion if measure by sum_diff. Threshold is set by ACC_CONST---
-
    #ifdef __DEBUG
     Mat tttt;
     double min2,max2;
@@ -218,6 +215,8 @@ Frontalization3D::frontalize(
   #endif
 
 
+  ///----Apply symetry transfrom if one side of face is more ocludded------
+  ///----Occlusion if measure by sum_diff. Threshold is set by ACC_CONST-
   //Does it help?
   if (abs(sum_diff) > ACC_CONST && _applySymetry)
   {

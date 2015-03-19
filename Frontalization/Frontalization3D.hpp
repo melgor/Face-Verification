@@ -1,7 +1,7 @@
 #ifndef FRONT_FRONTALIZATION_HPP
 #define FRONT_FRONTALIZATION_HPP
-#include "faceattribute.hpp"
-#include "cameramodel.hpp"
+#include "FaceAttribute.hpp"
+#include "CameraModel.hpp"
 
 
 // Function of frontalization of faces: the purpose is to get same face image regardless of face rotations, translation

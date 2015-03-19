@@ -1,7 +1,7 @@
 #ifndef FRONT_CAMERA_MODEL_HPP
 #define FRONT_CAMERA_MODEL_HPP
-#include "faceattribute.hpp"
-#include "utils/parseYAML.hpp"
+#include "FaceAttribute.hpp"
+#include "Utils/ParseYAML.hpp"
 ///Model of reference face. Name same like in MatLab
 // struct Model3D
 // {

@@ -1,10 +1,10 @@
 #ifndef FRONT_FACEEXTRACTOR_HPP
 #define FRONT_FACEEXTRACTOR_HPP
 
-#include "faceattribute.hpp"
-#include "cameramodel.hpp"
-#include "frontalization3D.hpp"
-#include "affinemodel.hpp"
+#include "FaceAttribute.hpp"
+#include "CameraModel.hpp"
+#include "Frontalization3D.hpp"
+#include "AffineModel.hpp"
 
 //Class for controling all flow of face Aligment
 class FaceExtractor

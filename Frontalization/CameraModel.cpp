@@ -1,15 +1,15 @@
 /* 
 * @Author: melgor
 * @Date:   2015-02-09 10:03:31
-* @Last Modified 2015-03-17
-* @Last Modified time: 2015-03-17 17:55:32
+* @Last Modified 2015-03-19
+* @Last Modified time: 2015-03-19 11:57:31
 */
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <math.h>
-#include "cameramodel.hpp"
+#include "CameraModel.hpp"
 
 //TODO: eliminate YAML dependies by serialzing DLIB camera model
 // 1. Camera calibration checked with Matlab: Done

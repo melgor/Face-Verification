@@ -1,11 +1,11 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-03 10:56:35
-* @Last Modified 2015-03-06
-* @Last Modified time: 2015-03-06 08:42:57
+* @Last Modified 2015-03-19
+* @Last Modified time: 2015-03-19 11:59:40
 */
 
-#include "netExtractor.hpp"
+#include "NetExtractor.hpp"
 
 using namespace caffe;
 using namespace std;

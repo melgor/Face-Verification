@@ -2,8 +2,8 @@
 #define FRONT_FACE_ATTRIBUTE_HPP
 
 #include <opencv2/core/core.hpp>
-#include "utils/Utils.hpp"
 #include <dlib/image_processing/frontal_face_detector.h>
+#include "Utils/Utils.hpp"
 // Class for detecting face and characteristig face point
 // There are several algorithm, here will be used implemented by DLIB:
 // "One Millisecond Face Alignment with an Ensemble of Regression Trees by Vahid Kazemi and Josephine Sullivan"

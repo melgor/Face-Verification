@@ -1,6 +1,6 @@
 #ifndef FRONT_AFFINEMODEL_HPP
 #define FRONT_AFFINEMODEL_HPP
-#include "faceattribute.hpp"
+#include "FaceAttribute.hpp"
 //class which will align face in 2D using Homography transformation
 
 class AffineModel
@@ -18,6 +18,9 @@ public:
                         std::vector<cv::Mat>& cameraModels
                         );
   ~AffineModel();
+
+  FacePoints& getModel6();  
+  FacePoints& getModel68();      
 
  private: 
   FacePoints       _pointModel6;
