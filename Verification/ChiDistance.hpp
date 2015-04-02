@@ -1,5 +1,8 @@
+#ifndef VERIFICATION_CHIDISTANCE_H
+#define VERIFICATION_CHIDISTANCE_H
+
 #include <opencv2/ml/ml.hpp>
-#include "Utils/Utils.hpp"
+#include "SVM.hpp"
 
 //Class implementing Chi^2 distance, used in "DeepFace" paper by Facebook
 class ChiDistance
@@ -16,7 +19,7 @@ public:
 
 private:
   //transform data from classification task to verfication
-  void prepateTrainData(cv::Mat& features, cv::Mat& labels);
+  void prepateTrainData(cv::Mat& features, cv::Mat& labels, std::vector<int>& labelsVec);
   //get feature vector of Chi
   void transformData(cv::Mat f1, cv::Mat f2, cv::Mat& featChi);
   CvSVM*           _comparator;
@@ -25,6 +28,9 @@ private:
   //data for training
   std::string      _pathTrainFeatures;
   std::string      _pathValFeatures;
-  struct Features* _trainFeatures = NULL;
+  struct Features* _trainFeatures    = NULL;
+  SVMLinear*       _comparatorLinear = NULL;
 
 };
+
+#endif

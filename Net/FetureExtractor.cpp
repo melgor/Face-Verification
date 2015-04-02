@@ -1,8 +1,8 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-03 15:35:29
-* @Last Modified 2015-03-19
-* @Last Modified time: 2015-03-19 12:11:30
+* @Last Modified 2015-03-20
+* @Last Modified time: 2015-03-20 08:23:28
 */
 #include <iostream>
 #include <fstream>
@@ -33,6 +33,7 @@ FetureExtractor::extractAllFeatures()
   Mat features;
   uint num_images = 0;
   vector<int> labels;
+  vector<string> names;
   if (myfile.is_open())
   {
     vector<string> splitteds;
@@ -42,6 +43,7 @@ FetureExtractor::extractAllFeatures()
       boost::split(splitteds, line, boost::is_any_of(" "));
       image_path.push_back(splitteds[0]);
       labels.push_back(std::stoi(splitteds[1]));
+      names.push_back(splitteds[0]);
       splitteds.clear();
       if(image_path.size() == _batchSize)
       {
@@ -74,7 +76,7 @@ FetureExtractor::extractAllFeatures()
   if(_scaleFeatures)
     scaleData(features);
   //serialize feature
-  Features feat = {features,labels};
+  Features feat = {features,labels,names};
   string name_file = _folder + to_string(_numBatch) + ".bin";
   cout<<"Save: "<< name_file<<endl;
   compress(feat,name_file);

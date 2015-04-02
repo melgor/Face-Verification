@@ -21,8 +21,9 @@ struct Feature
 
 struct Features
 {
-  cv::Mat            data;
-  std::vector<int> labels;
+  cv::Mat                  data;
+  std::vector<int>         labels;
+  std::vector<std::string> names;
 };
 
 BOOST_SERIALIZATION_SPLIT_FREE(::Feature)
@@ -78,6 +79,7 @@ namespace boost {
       ar & elem_size;
       ar & elem_type;
       ar & m.labels;
+      ar & m.names;
  
       const size_t data_size = m.data.cols * m.data.rows * elem_size;
       ar & boost::serialization::make_array(m.data.ptr(), data_size);
@@ -89,6 +91,7 @@ namespace boost {
     {
       int cols, rows;
       std::vector<int> labels;
+      std::vector<std::string> names;
       size_t elem_size, elem_type;
  
       ar & cols;
@@ -96,9 +99,11 @@ namespace boost {
       ar & elem_size;
       ar & elem_type;
       ar & labels;
- 
+      ar & names;
+
       m.data.create(rows, cols, elem_type);
       m.labels = labels;
+      m.names  = names;
       size_t data_size = m.data.cols * m.data.rows * elem_size;
       ar & boost::serialization::make_array(m.data.ptr(), data_size);
     }
@@ -130,7 +135,6 @@ void compress(T& obj, std::string path)
  
  
   std::ofstream ofs(path, std::ios::out | std::ios::binary);
- 
   { // use scope to ensure archive and filtering stream buffer go out of scope before stream
     io::filtering_streambuf<io::output> out;
     out.push(io::zlib_compressor(io::zlib::best_speed));
@@ -148,9 +152,7 @@ void load(T& obj, std::string path)
 {
   namespace io = boost::iostreams;
  
- 
   std::ifstream ifs(path, std::ios::in | std::ios::binary);
- 
   {
     io::filtering_streambuf<io::input> in;
     in.push(io::zlib_decompressor());

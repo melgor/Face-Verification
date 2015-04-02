@@ -1,8 +1,8 @@
 /* 
 * @Author: melgor
 * @Date:   2015-02-09 10:07:08
-* @Last Modified 2015-03-19
-* @Last Modified time: 2015-03-19 11:57:45
+* @Last Modified 2015-03-31
+* @Last Modified time: 2015-03-31 14:37:35
 */
 
 #include "FaceAttribute.hpp"
@@ -49,8 +49,10 @@ FaceAttribute::detectFaceAndPoint(
     vector<dlib::rectangle> detected_faces = _frontalFaceDetector(cimg);
     if (!detected_faces.size())
     {
-      cerr<<"No Face Detected"<<endl;
-      return;
+      // cerr<<"No Face Detected"<<endl;
+      // return;
+      dlib::rectangle rect(img.size().width,img.size().height);
+      detected_faces.push_back(rect);
     }
     else
     {

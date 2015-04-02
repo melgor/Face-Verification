@@ -1,8 +1,8 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-10 11:14:56
-* @Last Modified 2015-03-19
-* @Last Modified time: 2015-03-19 11:58:09
+* @Last Modified 2015-03-26
+* @Last Modified time: 2015-03-26 10:45:17
 */
 
 #include "FaceExtractor.hpp"
@@ -105,6 +105,7 @@ FaceExtractor::getFrontalFace(
       // cerr<<camera_model_2D[i]<<endl;
       perspectiveTransform(face_points[i], face_points_align[i], per_mat);
     }
+    // outFrontal[i] = face_align[i].clone();
     #ifdef __DEBUG
     Mat cc = face_align[i].clone();  
     vector<Point2f> ref_XY = _camera->getRefXY();    
