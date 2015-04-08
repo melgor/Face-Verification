@@ -15,13 +15,15 @@ public:
   void verifyVal();
   ~ChiDistance();
 
-
-
 private:
   //transform data from classification task to verfication
   void prepateTrainData(cv::Mat& features, cv::Mat& labels, std::vector<int>& labelsVec);
   //get feature vector of Chi
   void transformData(cv::Mat f1, cv::Mat f2, cv::Mat& featChi);
+  //learn scale value from train data
+  void learnScaleParam(cv::Mat& features);
+  //scale data
+  void scaleData(cv::Mat& features);
   CvSVM*           _comparator;
   std::string      _pathComparator;
   float            _threshold;
@@ -30,7 +32,9 @@ private:
   std::string      _pathValFeatures;
   struct Features* _trainFeatures    = NULL;
   SVMLinear*       _comparatorLinear = NULL;
-
+  //data for scaling
+  //cv::Mat          _scaleValue;
+  cv::Mat          _maxValue;
 };
 
 #endif

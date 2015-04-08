@@ -1,8 +1,8 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-18 13:14:12
-* @Last Modified 2015-04-02
-* @Last Modified time: 2015-04-02 12:37:56
+* @Last Modified 2015-04-06
+* @Last Modified time: 2015-04-06 21:06:22
 */
 #include "ChiDistance.hpp"
 #include "Utils/Serialization.hpp"
@@ -41,6 +41,15 @@ ChiDistance::train()
   //load train data
   _trainFeatures      = new Features;
   load( *_trainFeatures, _pathTrainFeatures);
+  learnScaleParam(_trainFeatures->data);
+  //scale all features
+  Mat scale_data_all;
+  for(int row = 0; row < _trainFeatures->data.rows; row++)
+  {
+    Mat scaled_data = _trainFeatures->data.row(row);
+    scaleData( scaled_data );
+    scale_data_all.push_back(scaled_data);
+  }
   Mat features,labels;
   vector<int> labelsVec;
   prepateTrainData(features, labels,labelsVec);
@@ -103,6 +112,7 @@ ChiDistance::prepateTrainData(
                               , vector<int>& labelsVec
                               )
 {
+
   int num_example =  _trainFeatures->labels.size();
   labelsVec.resize(2*num_example,0);
   int num_positive_example = 0,num_negative_example = 0; 
@@ -155,29 +165,64 @@ ChiDistance::prepateTrainData(
 
 }
 
-void 
+void
 ChiDistance::transformData(
-                            Mat f1
-                          , Mat f2
+                            Mat  f1
+                          , Mat  f2
                           , Mat& featChi
                           )
-{ 
+{
   //dist = (f1 + f2)^2 elementwise
   Mat distance = f1 - f2;
   distance = distance.mul(distance);
   //out = dist/(f1 + f2) elementwise
-  featChi = distance.mul(1.0/(f1 + f2)); 
+  Mat sum_f = f1 + f2;
+  MatIterator_<float> it_dst = sum_f.begin<float>(), it_end_dst = sum_f.end<float>();
+  for(MatIterator_<float> j = it_dst; j != it_end_dst ;++j)
+  {
+    if (*j == 0)
+    {
+      *j = 1.0f;
+    }
+  }
+  featChi = distance.mul(1.0/(sum_f)); 
   // std::cerr<<featChi<<std::endl;
 
 }
 
+void 
+ChiDistance::learnScaleParam( Mat& features )
+{
+  //find max value of each feature value
+  _maxValue = Mat(Size(features.size().width,1),features.type());
+  double min, max;
+  for(int col = 0; col < features.cols; col++)
+  {
+    //get row of features from column
+    Mat feat_col = features.col(col);
+    cv::minMaxLoc(feat_col, &min, &max);
+    //TODO: set one type of Mat
+    if(float(max) != 0.0f)
+      _maxValue.at<float>(col,0) = float(max);
+    else
+      _maxValue.at<float>(col,0) = 1.0f;
+  }
+}
+
+void
+ChiDistance::scaleData( 
+                        Mat& features
+                       )
+{
+  features =  features.mul(1.0/(_maxValue));
+}
+
 ChiDistance::~ChiDistance()
 {
-  
+
   delete _comparator;
   delete _comparatorLinear;
   if (_trainFeatures != NULL)
       delete _trainFeatures;
 
-  
 }
