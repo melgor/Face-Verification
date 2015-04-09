@@ -1,8 +1,8 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-03 15:35:29
-* @Last Modified 2015-03-20
-* @Last Modified time: 2015-03-20 08:23:28
+* @Last Modified 2015-04-08
+* @Last Modified time: 2015-04-08 09:39:17
 */
 #include <iostream>
 #include <fstream>
@@ -94,7 +94,7 @@ FetureExtractor::extractFromMat(
   {
     cerr<<path<<endl;
     cv::Mat img = cv::imread(path);
-    cv::resize(img, image_data[num_img], cv::Size(45,45));
+    cv::resize(img, image_data[num_img], cv::Size(47,55));
     num_img++;
   }
   _netExtractor->extractFeatures(image_data, features);;

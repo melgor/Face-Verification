@@ -1,8 +1,8 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-18 13:14:12
-* @Last Modified 2015-04-06
-* @Last Modified time: 2015-04-06 21:06:22
+* @Last Modified 2015-04-08
+* @Last Modified time: 2015-04-08 15:09:19
 */
 #include "ChiDistance.hpp"
 #include "Utils/Serialization.hpp"
@@ -27,6 +27,8 @@ ChiDistance::compare(
                     )
 {
   Mat chi_data;
+  scaleData(featureOne);
+  scaleData(featureTwo);
   transformData(featureOne,featureTwo,chi_data);
   float res = _comparator->predict(chi_data); 
   cerr<<"Predicted: "<<res<<endl;
@@ -41,6 +43,7 @@ ChiDistance::train()
   //load train data
   _trainFeatures      = new Features;
   load( *_trainFeatures, _pathTrainFeatures);
+  cerr<<"Scale Data"<<endl;
   learnScaleParam(_trainFeatures->data);
   //scale all features
   Mat scale_data_all;
@@ -52,20 +55,22 @@ ChiDistance::train()
   }
   Mat features,labels;
   vector<int> labelsVec;
-  prepateTrainData(features, labels,labelsVec);
-  // _comparatorLinear->learn(features,labelsVec);
- // _comparatorLinear-> saveModel(_pathComparator);
-  //set SVM parameters
-  CvSVMParams params;
-  params.svm_type    = CvSVM::C_SVC;
-  params.kernel_type = CvSVM::LINEAR;
-  params.term_crit   = cvTermCriteria(CV_TERMCRIT_ITER, 10000, 1e-6);
-  // Mat features,labels;
-  // 
-  cerr<<features.size()<<" "<<labels.size()<<endl;
-  _comparator->train(features, labels, Mat(), Mat(), params);
-  _comparator->save(_pathComparator.c_str());
+  cerr<<"Create Verification Task"<<endl;
+  prepateTrainData(scale_data_all, features, labels,labelsVec);
+  cerr<<"Learn Model"<<endl;
+  _comparatorLinear->learn(features,labelsVec);
+  _comparatorLinear-> saveModel(_pathComparator);
 
+  // //set SVM parameters
+  // CvSVMParams params;
+  // params.svm_type    = CvSVM::C_SVC;
+  // params.kernel_type = CvSVM::LINEAR;
+  // params.term_crit   = cvTermCriteria(CV_TERMCRIT_ITER, 10000, 1e-6);
+  // // Mat features,labels;
+  // cerr<<features.size()<<" "<<labels.size()<<endl;
+  // _comparator->train(features, labels, Mat(), Mat(), params);
+  // _comparator->save(_pathComparator.c_str());
+  cerr<<"Model Saved"<<endl;
 }
 
 void 
@@ -107,14 +112,15 @@ ChiDistance::verifyVal()
 
 void 
 ChiDistance::prepateTrainData( 
-                                Mat& features
-                              , Mat& labels
-                              , vector<int>& labelsVec
+                                Mat& scaledFetures
+                              , Mat& featuresVer
+                              , Mat& labelsVer
+                              , vector<int>& labelsVecVer
                               )
 {
 
   int num_example =  _trainFeatures->labels.size();
-  labelsVec.resize(2*num_example,0);
+  labelsVecVer.resize(2*num_example,0);
   int num_positive_example = 0,num_negative_example = 0; 
   RNG rng;
   int feat_1 = 0, feat_2 = 0;
@@ -135,10 +141,10 @@ ChiDistance::prepateTrainData(
     // cerr<<"Labels: "<<_trainFeatures->labels[feat_1] <<" "<< _trainFeatures->labels[feat_2]<<" "  << feat_1 << "  "<<feat_2<<" names: "<<_trainFeatures->names[feat_1]<<" "<<_trainFeatures->names[feat_2] << endl;
     Mat feat;
 
-    transformData(_trainFeatures->data.row(feat_1),_trainFeatures->data.row(feat_2),feat);
-    features.push_back(feat);
+    transformData(scaledFetures.row(feat_1),scaledFetures.row(feat_2),feat);
+    featuresVer.push_back(feat);
     // if (_trainFeatures->labels[feat_1] == _trainFeatures->labels[feat_2])
-    labelsVec[i] = 1;
+    labelsVecVer[i] = 1;
   }
 
   //produce only negative example
@@ -155,13 +161,13 @@ ChiDistance::prepateTrainData(
   
     Mat feat;
 
-    transformData(_trainFeatures->data.row(feat_1),_trainFeatures->data.row(feat_2),feat);
-    features.push_back(feat);
+    transformData(scaledFetures.row(feat_1),scaledFetures.row(feat_2),feat);
+    featuresVer.push_back(feat);
     // if (_trainFeatures->labels[feat_1] == _trainFeatures->labels[feat_2])
     //   labelsVec[i] = 1;
   }
 
-  labels = Mat(labelsVec);
+  labelsVer = Mat(labelsVecVer);
 
 }
 
@@ -180,7 +186,7 @@ ChiDistance::transformData(
   MatIterator_<float> it_dst = sum_f.begin<float>(), it_end_dst = sum_f.end<float>();
   for(MatIterator_<float> j = it_dst; j != it_end_dst ;++j)
   {
-    if (*j == 0)
+    if (*j == 0.0f)
     {
       *j = 1.0f;
     }
@@ -194,19 +200,22 @@ void
 ChiDistance::learnScaleParam( Mat& features )
 {
   //find max value of each feature value
-  _maxValue = Mat(Size(features.size().width,1),features.type());
+  _maxValue = Mat::zeros(Size(features.size().width,1),features.type());
   double min, max;
   for(int col = 0; col < features.cols; col++)
   {
     //get row of features from column
     Mat feat_col = features.col(col);
+    cerr<<"Size: "<< feat_col.size()  <<" Type: "<<feat_col.type() <<" "<<  col<< endl;
     cv::minMaxLoc(feat_col, &min, &max);
+     cerr<<"min: "<< min  <<" max: "<<max <<" "<<  col<< endl;
     //TODO: set one type of Mat
     if(float(max) != 0.0f)
-      _maxValue.at<float>(col,0) = float(max);
+      _maxValue.at<float>(0,col) = float(max);
     else
-      _maxValue.at<float>(col,0) = 1.0f;
+      _maxValue.at<float>(0,col) = 1.0f;
   }
+  cerr<<"Scale Mat: "<< _maxValue << endl;
 }
 
 void

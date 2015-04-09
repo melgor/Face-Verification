@@ -17,7 +17,7 @@ public:
 
 private:
   //transform data from classification task to verfication
-  void prepateTrainData(cv::Mat& features, cv::Mat& labels, std::vector<int>& labelsVec);
+  void prepateTrainData(cv::Mat& scaledFetures, cv::Mat& featuresVer, cv::Mat& labelsVer, std::vector<int>& labelsVecVer);
   //get feature vector of Chi
   void transformData(cv::Mat f1, cv::Mat f2, cv::Mat& featChi);
   //learn scale value from train data

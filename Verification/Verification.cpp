@@ -21,6 +21,30 @@ double cosineSimilarity(Mat& vec1, Mat& vec2)
   return dot_prodcut/sqrt(sum_vec1 * sum_vec2);
 }
 
+void chiSquaredDistance(
+                          Mat  f1
+                        , Mat  f2
+                        , Mat& featChi
+                        )
+{
+  //dist = (f1 + f2)^2 elementwise
+  Mat distance = f1 - f2;
+  distance = distance.mul(distance);
+  //out = dist/(f1 + f2) elementwise
+  Mat sum_f = f1 + f2;
+  MatIterator_<float> it_dst = sum_f.begin<float>(), it_end_dst = sum_f.end<float>();
+  for(MatIterator_<float> j = it_dst; j != it_end_dst ;++j)
+  {
+    if (*j == 0.0f)
+    {
+      *j = 1.0f;
+    }
+  }
+  featChi = distance.mul(1.0/(sum_f)); 
+  // std::cerr<<featChi<<std::endl;
+
+}
+
 
 Verificator::Verificator(struct Configuration& config)
 {

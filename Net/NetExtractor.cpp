@@ -1,8 +1,8 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-03 10:56:35
-* @Last Modified 2015-03-19
-* @Last Modified time: 2015-03-19 11:59:40
+* @Last Modified 2015-04-08
+* @Last Modified time: 2015-04-08 10:22:08
 */
 
 #include "NetExtractor.hpp"
@@ -32,8 +32,11 @@ NetExtractor::NetExtractor(struct Configuration& config)
 
   _net = new Net<float>(_protoPath,caffe::TEST);
   _net->CopyTrainedLayersFrom(_caffeModelPath);
-  _memoryDataLayer = boost::static_pointer_cast<MemoryDataLayer<float> >(_net->layer_by_name("data"));
+  const boost::shared_ptr<Blob<float> >& dataLayer = _net->blob_by_name("data");
+  dataLayer->Reshape(1, 3, 55, 47);
+  _net->Reshape();
   
+  _memoryDataLayer = boost::static_pointer_cast<MemoryDataLayer<float> >(_net->layer_by_name("data"));
 }
 
 void 
@@ -56,12 +59,13 @@ NetExtractor::extractFeatures(
     extract(feat);
     features.push_back(feat);
   }
+
 }
 
 void 
 NetExtractor::extract(
                       cv::Mat& feature
-                    )
+                     )
 {
   float loss = 0.0;
   vector<Blob<float>*> results = _net->ForwardPrefilled(&loss);
