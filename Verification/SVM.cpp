@@ -2,7 +2,7 @@
 * @Author: blcv
 * @Date:   2015-03-19 13:08:33
 * @Last Modified 2015-04-09
-* @Last Modified time: 2015-04-09 13:36:42
+* @Last Modified time: 2015-04-09 15:33:40
 */
 
 #include "SVM.hpp"
@@ -37,8 +37,30 @@ SVMLinear::learn(
 int
 SVMLinear::predict_class(cv::Mat& features)
 {
-  int ncol = features.cols + 2;
   feature_node **x = (struct feature_node**)calloc(1, sizeof(struct feature_node*));
+  //fill data
+  prepareData(features, x);
+
+  return predict(_classifier, x[0]);//,prob);
+}
+
+float 
+SVMLinear::predict_prob(Mat& features)
+{
+  feature_node **x = (struct feature_node**)calloc(1, sizeof(struct feature_node*));
+  //fill data
+  prepareData(features, x);
+  double prob[2];
+  predict_probability(_classifier, x[0],&prob[0]);
+  return prob[1];
+}
+
+void 
+SVMLinear::prepareData(
+                         Mat& features
+                        ,feature_node **x
+                        )
+{ int ncol = features.cols + 2;
   struct feature_node *xbuff = (struct feature_node*)calloc( (size_t)1 * (size_t)ncol, sizeof(struct feature_node) );
  //fill data
 
@@ -63,10 +85,8 @@ SVMLinear::predict_class(cv::Mat& features)
     xbuff[features.cols].index = -1;
     xbuff[features.cols].value = -1;
   }
-
-
- return predict(_classifier, x[0]);//,prob);
 }
+
 
 void 
 SVMLinear::setParams() 

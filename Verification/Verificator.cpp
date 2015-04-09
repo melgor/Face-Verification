@@ -2,7 +2,7 @@
 * @Author: melgor
 * @Date:   2015-04-09 09:05:37
 * @Last Modified 2015-04-09
-* @Last Modified time: 2015-04-09 13:37:41
+* @Last Modified time: 2015-04-09 15:01:13
 */
 
 #include "Verificator.hpp"
@@ -30,8 +30,6 @@ Verificator::Verificator(struct Configuration& config)
 void
 Verificator::train()
 {
-
-  
   //load train data
   _trainFeatures      = new Features;
   load( *_trainFeatures, _pathTrainFeatures);
@@ -86,8 +84,8 @@ Verificator::verify()
 //compare if two features descrive same person or not
 int
 Verificator::compare(
-                      cv::Mat& featureOne
-                    , cv::Mat& featureTwo
+                      Mat& featureOne
+                    , Mat& featureTwo
                     )
 {
   //compute feature representation
@@ -100,16 +98,19 @@ Verificator::compare(
 
 //scale data
 void 
-Verificator::scaleData(cv::Mat features, cv::Mat& scaledFeatures)
+Verificator::scaleData(
+                        Mat features
+                      , Mat& scaledFeatures
+                      )
 {
   scaledFeatures =  features.mul(1.0/(_maxValue));
 }
 
 void 
 Verificator::prepareVerificationData(
-                              cv::Mat& scaledFetures
-                            , cv::Mat& featuresVer
-                            , std::vector<int>& labelsVecVer
+                              Mat& scaledFetures
+                            , Mat& featuresVer
+                            , vector<int>& labelsVecVer
                             )
 {
   int num_example =  _trainFeatures->labels.size();
@@ -159,7 +160,7 @@ Verificator::prepareVerificationData(
 
 //learn scale value from train data
 void
-Verificator::learnScaleParam(cv::Mat& features)
+Verificator::learnScaleParam(Mat& features)
 {
   //find max value of each feature value
   _maxValue = Mat::zeros(Size(features.size().width,1),features.type());
@@ -169,7 +170,7 @@ Verificator::learnScaleParam(cv::Mat& features)
     //get row of features from column
     Mat feat_col = features.col(col);
     // cerr<<"Size: "<< feat_col.size()  <<" Type: "<<feat_col.type() <<" "<<  col<< endl;
-    cv::minMaxLoc(feat_col, &min, &max);
+    minMaxLoc(feat_col, &min, &max);
      // cerr<<"min: "<< min  <<" max: "<<max <<" "<<  col<< endl;
     //TODO: set one type of Mat
     if(float(max) != 0.0f)

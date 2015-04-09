@@ -16,6 +16,8 @@ public:
   void learn(cv::Mat& features, std::vector<int>& labels);
   //predict class
   int predict_class(cv::Mat& features);
+  //predict probability of assignes as same class
+  float predict_prob(cv::Mat& features);
   //save and load model
   void saveModel(std::string name);
   void loadModel(std::string name);
@@ -28,7 +30,8 @@ public:
 private:
   // set parameters for LIBLINEAR
   void setParams();
- 
+  //prepare data for predicting
+  void prepareData(cv::Mat& features, feature_node **x);
   // set class weights
   void setClassWeights(double wtpos, double wtneg);
  
