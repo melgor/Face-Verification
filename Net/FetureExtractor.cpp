@@ -1,8 +1,8 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-03 15:35:29
-* @Last Modified 2015-04-08
-* @Last Modified time: 2015-04-08 09:39:17
+* @Last Modified 2015-04-09
+* @Last Modified time: 2015-04-09 13:28:38
 */
 #include <iostream>
 #include <fstream>
@@ -20,7 +20,6 @@ FetureExtractor::FetureExtractor(struct Configuration& config)
   _netExtractor  = new NetExtractor(config);
   _folder        = config.extractorFolder;
   _imageList     = config.extractorImageList;
-  _scaleFeatures = config.scaleFeature;
 }
 
 void 
@@ -71,10 +70,7 @@ FetureExtractor::extractAllFeatures()
   {
     std::cerr << "Unable to open file"; 
   }
-  
-  //scale features
-  if(_scaleFeatures)
-    scaleData(features);
+
   //serialize feature
   Features feat = {features,labels,names};
   string name_file = _folder + to_string(_numBatch) + ".bin";
@@ -98,23 +94,6 @@ FetureExtractor::extractFromMat(
     num_img++;
   }
   _netExtractor->extractFeatures(image_data, features);;
-  
-}            
-
-void 
-FetureExtractor::scaleData( Mat& features)   
-{
-  _statisticFeatures = Mat(Size(features.cols,1),CV_32FC1);
-  //For each column find maxiumum value (minimum is 0 because of ReLU)
-  double min, max;
-  for(int cols = 0; cols < features.cols; cols++)
-  {
-    Mat col = features.col(cols);
-    cv::minMaxLoc(col, &min, &max);
-    _statisticFeatures.at<float>(0,cols) = float(max);
-    if (float(max) != float(0.0))
-      col /= float(max);
-  }
 
 }
 

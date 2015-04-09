@@ -42,13 +42,15 @@ struct Configuration
   //Extractor
   std::string  extractorFolder;
   std::string  extractorImageList;
-  bool         scaleFeature;
   //Verification
   std::string  trainData;
   std::string  valData;
   std::string  metric;
-  std::string  pathComparatorChi;
-  float        thresholdChi;
+  std::string  pathComparator;
+  std::string  pathScaler;
+  float        threshold;
+  bool         scaleFeature;
+
 
 
 
@@ -58,12 +60,12 @@ struct Configuration
     parser.read(argc, argv);
 
     reset          = parser.reset;
-    nameScene      = parser.scene; 
+    nameScene      = parser.scene;
     folderpath     = parser.folderpath;
-    
+
     boost::property_tree::ptree pt;
     boost::property_tree::ini_parser::read_ini(parser.config, pt);
-    //mode 
+    //mode
     mode           = pt.get<std::string>("Mode.Mode");
     //face detection
     posemodel      = pt.get<std::string>("FaceDecetion.PoseModel");
@@ -83,13 +85,14 @@ struct Configuration
     //Extractor
     extractorFolder    = pt.get<std::string>("Extract.Folder");
     extractorImageList = pt.get<std::string>("Extract.ImageListDB");
-    scaleFeature       = pt.get<bool>("Extract.ScaleFeature");
     //Verificator
     trainData         = pt.get<std::string>("Verification.TrainData");
     valData           = pt.get<std::string>("Verification.ValData");
     metric            = pt.get<std::string>("Verification.Metric");
-    pathComparatorChi = pt.get<std::string>("Verification.ChiPath");
-    thresholdChi      = pt.get<float>("Verification.ChiThres");
+    pathComparator    = pt.get<std::string>("Verification.ComparatorPath");
+    threshold         = pt.get<float>("Verification.Thres");
+    pathScaler        = pt.get<std::string>("Verification.ScalerPath");
+    scaleFeature       = pt.get<bool>("Verification.ScaleFeature");
   }
 
   void print()

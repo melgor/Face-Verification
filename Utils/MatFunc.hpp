@@ -1,3 +1,6 @@
+#ifndef MATFUNC_HPP
+#define MATFUNC_HPP
+
 #include <opencv2/core/core.hpp>
 #include <vector>
 
@@ -19,3 +22,5 @@ void modify( cv::Mat& src , cv::Mat& dst, std::vector<int>& ind_frontal);
 //Implement MatLab style: "dst[ind_frontal] = src", where ind_frontal is sparse
 template<typename T>
 void modify( std::vector<int>& src, cv::Mat& dst , std::vector<int>& ind_frontal);
+
+#endif
