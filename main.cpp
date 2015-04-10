@@ -1,7 +1,7 @@
 /*
 * @Author: melgor
 * @Date:   2014-05-26 22:22:02
-* @Last Modified 2015-04-09
+* @Last Modified 2015-04-10
 */
 #include <chrono>
 #include <iostream>
@@ -9,7 +9,7 @@
 #include "Frontalization/FaceExtractor.hpp"
 #include "Net/FetureExtractor.hpp"
 #include "Verification/Verificator.hpp"
-
+#include "Verification/FaceDataBase.hpp"
 
 using namespace std;
 int main(int argc, char **argv)
@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     cout<<"Verify"<<endl;
     Verificator verificator(conf);
     verificator.verify();
-    
+
   }
   else if(conf.mode == "train")
   {
@@ -102,6 +102,24 @@ int main(int argc, char **argv)
         i++;
       }
     }
+  }
+  else if (conf.mode == "demo")
+  {
+    //get frontal face
+    cv::Mat image = cv::imread(conf.nameScene);
+    std::vector<cv::Mat> v(1,image);
+    std::vector<cv::Mat> outFrontal;
+    FaceExtractor front(conf);
+    auto t12 = std::chrono::high_resolution_clock::now();
+    front.getFrontalFace(v,outFrontal);
+    //extract feature
+    FetureExtractor net_ext(conf);
+    cv::Mat features;
+    net_ext.extractFeature(outFrontal[0],features);
+    //classify image
+    FaceDataBase face_data(conf);
+    int label = face_data.returnClosestID(features);
+    std::cerr<<"Label: "<< label << std::endl;
   }
   else if (conf.mode == "create_model")
   {

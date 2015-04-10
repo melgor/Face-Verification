@@ -1,8 +1,8 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-03 15:35:29
-* @Last Modified 2015-04-09
-* @Last Modified time: 2015-04-09 13:28:38
+* @Last Modified 2015-04-10
+* @Last Modified time: 2015-04-10 09:53:40
 */
 #include <iostream>
 #include <fstream>
@@ -66,9 +66,9 @@ FetureExtractor::extractAllFeatures()
     }
 
   }
-  else 
+  else
   {
-    std::cerr << "Unable to open file"; 
+    std::cerr << "Unable to open file";
   }
 
   //serialize feature
@@ -78,7 +78,18 @@ FetureExtractor::extractAllFeatures()
   compress(feat,name_file);
 }
 
-void 
+void
+FetureExtractor::extractFeature(
+                                  Mat& image
+                                , Mat& feature
+                               )
+{
+  vector<Mat> image_data(1,cv::Mat());
+  cv::resize(image, image_data[0], cv::Size(47,55));
+  _netExtractor->extractFeatures(image_data, feature);;
+}
+
+void
 FetureExtractor::extractFromMat(
                                   vector<string>& imageList
                                 , Mat& features

@@ -1,8 +1,8 @@
 /* 
 * @Author: melgor
 * @Date:   2015-04-09 14:53:35
-* @Last Modified 2015-04-09
-* @Last Modified time: 2015-04-09 16:57:39
+* @Last Modified 2015-04-10
+* @Last Modified time: 2015-04-10 09:56:46
 */
 
 #include "FaceDataBase.hpp"
@@ -82,4 +82,11 @@ FaceDataBase::compare(
 
   //predict value or apply threshold
   return _comparatorLinear->predict_prob(feat);
+}
+
+FaceDataBase::~FaceDataBase()
+{
+  delete _comparatorLinear;
+  if (_dataFeatures != NULL)
+      delete _dataFeatures;
 }

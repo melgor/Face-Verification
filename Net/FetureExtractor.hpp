@@ -8,6 +8,7 @@ class FetureExtractor
 public:
   FetureExtractor(struct Configuration& config);
   void extractAllFeatures();
+  void extractFeature(cv::Mat& image, cv::Mat& feature);
   ~FetureExtractor();
 
 private:
