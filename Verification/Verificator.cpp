@@ -1,8 +1,8 @@
 /*
 * @Author: melgor
 * @Date:   2015-04-09 09:05:37
-* @Last Modified 2015-04-09
-* @Last Modified time: 2015-04-09 15:01:13
+* @Last Modified 2015-04-10
+* @Last Modified time: 2015-04-10 12:52:02
 */
 
 #include "Verificator.hpp"
@@ -18,6 +18,7 @@ Verificator::Verificator(struct Configuration& config)
   _pathValFeatures    = config.valData;
   _threshold          = config.threshold;
   _pathComparator     = config.pathComparator;
+  _pathComparatorMat  = config.pathComparatorMat;
   _metric             = config.metric;
   _pathScaler         = config.pathScaler;
   if (_metric == "Cosine")
@@ -49,8 +50,9 @@ Verificator::train()
   prepareVerificationData(scale_data_all, features,labelsVec);
   cerr<<"Learn Model"<<endl;
   _comparatorLinear->learn(features,labelsVec);
-  _comparatorLinear-> saveModel(_pathComparator);
+  _comparatorLinear->saveModel(_pathComparator, _pathComparatorMat);
   compress(_maxValue, _pathScaler);
+
   cerr<<"Model Saved"<<endl;
 }
 
@@ -61,7 +63,7 @@ Verificator::verify()
   _trainFeatures      = new Features;
   load( *_trainFeatures, _pathValFeatures);
   load(_maxValue, _pathScaler);
-  _comparatorLinear->loadModel(_pathComparator);
+  _comparatorLinear->loadModel(_pathComparator, _pathComparatorMat);
   //scale all features
   Mat scale_data_all;
   for(int row = 0; row < _trainFeatures->data.rows; row++)

@@ -1,8 +1,8 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-10 11:14:56
-* @Last Modified 2015-03-26
-* @Last Modified time: 2015-03-26 10:45:17
+* @Last Modified 2015-04-10
+* @Last Modified time: 2015-04-10 14:51:41
 */
 
 #include "FaceExtractor.hpp"
@@ -31,18 +31,18 @@ FaceExtractor::getFrontalFace(
   vector<FacePoints> face_points, face_points_align;
   vector<Rect> face_rect;
   _faceatt->detectFaceAndPoint(images,face_points, face_rect);
-  auto t22 = std::chrono::high_resolution_clock::now();
+  // auto t22 = std::chrono::high_resolution_clock::now();
 
-  std::cout  << "detectFacePoint took "
-             << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
-             << " milliseconds\n";
+  // std::cout  << "detectFacePoint took "
+  //            << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
+  //            << " milliseconds\n";
   if(!face_points.size())
   {
     cerr<<"Exit, no Face"<<endl;
     outFrontal.push_back(Mat::zeros(100,100,CV_8UC3));
     return;
   }  
-  t12 = std::chrono::high_resolution_clock::now();
+  // t12 = std::chrono::high_resolution_clock::now();
   cerr<<"Camera Model"<<endl;
   vector<Mat> camera_model_2D(face_points.size(),Mat());
   vector<Mat> camera_model_3D(face_points.size(),Mat());
@@ -63,7 +63,6 @@ FaceExtractor::getFrontalFace(
     //save image with facial_points
     for(uint j = 0; j <   face_rect.size(); j++)
     {
-      cerr<<images[0].size() << " "<<  face_rect[j] << endl;
       Mat cc = images[0](face_rect[j]).clone();             
       for(uint i = 0; i <   face_points[j].size(); i++)
       {
@@ -150,21 +149,21 @@ FaceExtractor::getFrontalFace(
   
   vector<Size> imageSizes_aling(imageSizes.size(),cv::Size(400,400));
   _camera->estimateCamera(face_points_align, imageSizes_aling, camera_model_3D);
-  t22 = std::chrono::high_resolution_clock::now();
+  // t22 = std::chrono::high_resolution_clock::now();
 
-  std::cout << "estimateCamera took "
-             << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
-             << " milliseconds\n";
+  // std::cout << "estimateCamera took "
+  //            << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
+  //            << " milliseconds\n";
 
   outFrontal.resize(face_points.size());
-  t12 = std::chrono::high_resolution_clock::now();
+  // t12 = std::chrono::high_resolution_clock::now();
   for(uint i = 0; i < face_points.size(); i++)
   {
     _align->frontalize(face_align[i],camera_model_3D[i],outFrontal[i]);
     // _align->frontalize(images[0],camera_model_3D[i],outFrontal[i],face_rect[i]);
   }
-  t22 = std::chrono::high_resolution_clock::now();
-  std::cout << "frontalize took "
+  auto t22 = std::chrono::high_resolution_clock::now();
+  std::cout << "Face Atribute took "
              << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
              << " milliseconds\n";
 

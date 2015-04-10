@@ -105,21 +105,30 @@ int main(int argc, char **argv)
   }
   else if (conf.mode == "demo")
   {
+    FaceExtractor front(conf);
+    FetureExtractor net_ext(conf);
+    FaceDataBase face_data(conf);
+
     //get frontal face
     cv::Mat image = cv::imread(conf.nameScene);
     std::vector<cv::Mat> v(1,image);
     std::vector<cv::Mat> outFrontal;
-    FaceExtractor front(conf);
     auto t12 = std::chrono::high_resolution_clock::now();
     front.getFrontalFace(v,outFrontal);
     //extract feature
-    FetureExtractor net_ext(conf);
     cv::Mat features;
     net_ext.extractFeature(outFrontal[0],features);
     //classify image
-    FaceDataBase face_data(conf);
     int label = face_data.returnClosestID(features);
+    auto t22 = std::chrono::high_resolution_clock::now();
     std::cerr<<"Label: "<< label << std::endl;
+    std::cout << "program took "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
+            << " milliseconds\n";
+    cv::imwrite("demo.jpg",outFrontal[0]);
+    // cv::namedWindow("frontalize",CV_WINDOW_NORMAL);
+    // cv::imshow("frontalize",outFrontal[0]);
+    // cv::waitKey();
   }
   else if (conf.mode == "create_model")
   {

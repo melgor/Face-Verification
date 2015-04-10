@@ -1,8 +1,8 @@
 /* 
 * @Author: melgor
 * @Date:   2015-02-09 10:07:08
-* @Last Modified 2015-03-31
-* @Last Modified time: 2015-03-31 14:37:35
+* @Last Modified 2015-04-10
+* @Last Modified time: 2015-04-10 14:50:33
 */
 
 #include "FaceAttribute.hpp"
@@ -148,7 +148,7 @@ FaceAttribute::getBoundingRect(
      right_bottom = Point(faceRect.right() + width_pad, faceRect.bottom() + height_pad );
      // cerr<<"W: "<< width_pad <<"   "<< imageRect <<"  "<< left_top << "    "<< right_bottom <<endl; 
   }
-  cerr<<"W: "<< width_pad <<"   "<< imageRect <<"  "<< left_top << "    "<< right_bottom <<endl; 
+  // cerr<<"W: "<< width_pad <<"   "<< imageRect <<"  "<< left_top << "    "<< right_bottom <<endl; 
   outRect = Rect(left_top,right_bottom);
 }
 

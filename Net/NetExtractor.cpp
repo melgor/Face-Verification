@@ -2,7 +2,7 @@
 * @Author: blcv
 * @Date:   2015-03-03 10:56:35
 * @Last Modified 2015-04-10
-* @Last Modified time: 2015-04-10 10:06:47
+* @Last Modified time: 2015-04-10 14:26:17
 */
 
 #include "NetExtractor.hpp"
@@ -59,6 +59,7 @@ NetExtractor::extractFeatures(
     extract(feat);
     features.push_back(feat);
   }
+  // cerr<<features<<endl;
 
 }
 

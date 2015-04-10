@@ -1,8 +1,8 @@
 /* 
 * @Author: melgor
 * @Date:   2015-02-09 10:03:31
-* @Last Modified 2015-03-19
-* @Last Modified time: 2015-03-19 11:57:31
+* @Last Modified 2015-04-10
+* @Last Modified time: 2015-04-10 14:49:52
 */
 
 #include <opencv2/core/core.hpp>
@@ -132,7 +132,6 @@ CameraModel::calcCamera(
   }
 
   model.convertTo(model, CV_32FC1);
-  cerr<<"Camera: "<<model<<endl;
 }
 
 int

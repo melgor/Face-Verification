@@ -47,6 +47,7 @@ struct Configuration
   std::string  valData;
   std::string  metric;
   std::string  pathComparator;
+  std::string  pathComparatorMat;
   std::string  pathScaler;
   std::string  faceData;
   float        threshold;
@@ -91,6 +92,7 @@ struct Configuration
     valData           = pt.get<std::string>("Verification.ValData");
     metric            = pt.get<std::string>("Verification.Metric");
     pathComparator    = pt.get<std::string>("Verification.ComparatorPath");
+    pathComparatorMat = pt.get<std::string>("Verification.ComparatorPathMat");
     threshold         = pt.get<float>("Verification.Thres");
     pathScaler        = pt.get<std::string>("Verification.ScalerPath");
     scaleFeature      = pt.get<bool>("Verification.ScaleFeature");

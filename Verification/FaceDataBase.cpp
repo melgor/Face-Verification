@@ -2,12 +2,14 @@
 * @Author: melgor
 * @Date:   2015-04-09 14:53:35
 * @Last Modified 2015-04-10
-* @Last Modified time: 2015-04-10 09:56:46
+* @Last Modified time: 2015-04-10 14:49:01
 */
 
 #include "FaceDataBase.hpp"
 #include "Distances.hpp"
 #include "Utils/Serialization.hpp"
+#include <chrono>
+
 using namespace std;
 using namespace cv;
 
@@ -15,9 +17,11 @@ FaceDataBase::FaceDataBase(struct Configuration& config)
 {
   _threshold          = config.threshold;
   _pathComparator     = config.pathComparator;
+  _pathComparatorMat  = config.pathComparatorMat;
   _metric             = config.metric;
   _pathScaler         = config.pathScaler;
   _pathFaceData       = config.faceData;
+
   if (_metric == "Cosine")
     distanceFunction = &cosineDistance;
   else if(_metric == "Chi")
@@ -30,20 +34,23 @@ FaceDataBase::FaceDataBase(struct Configuration& config)
   //load scaler value
   load(_maxValue, _pathScaler);
   //load learned model
-  _comparatorLinear->loadModel(_pathComparator);
+  _comparatorLinear->loadModel(_pathComparator,_pathComparatorMat);
 }
 
 //return id >= 0 if find in database. Otherwise, not
 int
 FaceDataBase::returnClosestID(Mat& feature)
 {
+  auto t12 = std::chrono::high_resolution_clock::now();
   vector<pair<float,int>> result_prob;
-  Mat scaled_feature;
+  Mat scaled_feature, scaled_feature2;
   scaleData(feature,scaled_feature);
   for(int row = 0; row < _dataFeatures->data.rows; row++)
   {
+
     Mat data_feature = _dataFeatures->data.row(row);
-    float prob_value = compare(scaled_feature,data_feature);
+    scaleData(data_feature,scaled_feature2);
+    float prob_value = compare(scaled_feature,scaled_feature2);
     result_prob.push_back(make_pair(prob_value, _dataFeatures->labels[row]));
   }
 
@@ -51,9 +58,13 @@ FaceDataBase::returnClosestID(Mat& feature)
                                     , []( const pair<float,int>& f1
                                         , const pair<float,int>& f2 )
                                     {
-                                      return f1.first > f2.first;
+                                      return f1.first < f2.first;
                                     });
-
+  auto t22 = std::chrono::high_resolution_clock::now();
+  std::cout  << "FaceDataBase took "
+             << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
+             << " milliseconds\n";
+  cerr<<"Max prob: "<< (*result).first << endl;
   if ((*result).first > _threshold)
     return (*result).second;
 

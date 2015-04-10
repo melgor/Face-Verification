@@ -13,10 +13,10 @@
 #include <fstream>
 #include <memory>
 
-struct Feature
+struct SVM_Mat
 {
-  cv::Mat data;
-  int label;
+  cv::Mat                  weights;
+  std::vector<float>         bias;
 };
 
 struct Features
@@ -26,46 +26,47 @@ struct Features
   std::vector<std::string> names;
 };
 
-BOOST_SERIALIZATION_SPLIT_FREE(::Feature)
+BOOST_SERIALIZATION_SPLIT_FREE(::SVM_Mat)
 BOOST_SERIALIZATION_SPLIT_FREE(::Features)
 BOOST_SERIALIZATION_SPLIT_FREE(cv::Mat)
 namespace boost {
   namespace serialization {
  
-    /** Serialization support for Feature */
+    /** Serialization support for SVM_Mat */
     template<class Archive>
-    void save(Archive & ar, const ::Feature& m, const unsigned int version)
+    void save(Archive & ar, const ::SVM_Mat& m, const unsigned int version)
     {
-      size_t elem_size = m.data.elemSize();
-      size_t elem_type = m.data.type();
+      size_t elem_size = m.weights.elemSize();
+      size_t elem_type = m.weights.type();
  
-      ar & m.data.cols;
-      ar & m.data.rows;
+      ar & m.weights.cols;
+      ar & m.weights.rows;
       ar & elem_size;
       ar & elem_type;
-      ar & m.label;
+      ar & m.bias;
  
-      const size_t data_size = m.data.cols * m.data.rows * elem_size;
-      ar & boost::serialization::make_array(m.data.ptr(), data_size);
+      const size_t data_size = m.weights.cols * m.weights.rows * elem_size;
+      ar & boost::serialization::make_array(m.weights.ptr(), data_size);
     }
 
-    /** Serialization support for Feature */
+    /** Serialization support for SVM_Mat */
     template<class Archive>
-    void load(Archive & ar, ::Feature& m, const unsigned int version)
+    void load(Archive & ar, ::SVM_Mat& m, const unsigned int version)
     {
-      int cols, rows,label;
+      int cols, rows;
       size_t elem_size, elem_type;
+      std::vector<float> bias;
  
       ar & cols;
       ar & rows;
       ar & elem_size;
       ar & elem_type;
-      ar & label;
+      ar & bias;
  
-      m.data.create(rows, cols, elem_type);
-      m.label = label;
-      size_t data_size = m.data.cols * m.data.rows * elem_size;
-      ar & boost::serialization::make_array(m.data.ptr(), data_size);
+      m.weights.create(rows, cols, elem_type);
+      m.bias = bias;
+      size_t data_size = m.weights.cols * m.weights.rows * elem_size;
+      ar & boost::serialization::make_array(m.weights.ptr(), data_size);
     }
 
     /** Serialization support for Features */

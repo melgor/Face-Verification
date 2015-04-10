@@ -1,11 +1,12 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-19 13:08:33
-* @Last Modified 2015-04-09
-* @Last Modified time: 2015-04-09 15:33:40
+* @Last Modified 2015-04-10
+* @Last Modified time: 2015-04-10 14:54:18
 */
 
 #include "SVM.hpp"
+#include "Utils/Serialization.hpp"
 
 using namespace std;
 using namespace cv;
@@ -32,27 +33,58 @@ SVMLinear::learn(
   setClassWeights(1.0,1.0);
   _classifier = train(&_data, &_param);
   evalModel();
+  getDecisionFunction();
 }
 
 int
 SVMLinear::predict_class(cv::Mat& features)
 {
-  feature_node **x = (struct feature_node**)calloc(1, sizeof(struct feature_node*));
+  // feature_node **x = (struct feature_node**)calloc(1, sizeof(struct feature_node*));
   //fill data
-  prepareData(features, x);
+  // prepareData(features, x);
+  // int num_clas = 2;
+  // std::vector<float> prob_class(num_clas,0);
+  // for(int cla = 0; cla < num_clas; num_clas++ )
+  // {
+  //   Mat weight_class = _classiferMat->weights.row(cla);
+  //   prob_class[cla] = weight_class.dot(features) + _classiferMat->bias[cla];
+  // }
 
-  return predict(_classifier, x[0]);//,prob);
+  // auto result = std::max_element(prob_class.begin(), prob_class.end()
+  //                                   , []( const float& f1
+  //                                       , const float& f2 )
+  //                                   {
+  //                                     return f1 > f2;
+  //                                   });
+
+  // return predict(_classifier, x[0]);//,prob);
+
+  float pred_sim = predict_prob(features);
+  if(pred_sim > 0.5)
+    return 1;
+  return 0;
+  // return std::distance(prob_class.begin(), result);
 }
 
 float 
 SVMLinear::predict_prob(Mat& features)
 {
-  feature_node **x = (struct feature_node**)calloc(1, sizeof(struct feature_node*));
-  //fill data
-  prepareData(features, x);
-  double prob[2];
-  predict_probability(_classifier, x[0],&prob[0]);
-  return prob[1];
+  // feature_node **x = (struct feature_node**)calloc(1, sizeof(struct feature_node*));
+  // //fill data
+  // prepareData(features, x);
+  // double prob[2];
+  // int lable = predict_probability(_classifier, x[0] ,&prob[0]);
+  // cerr<<"prob: "<< prob[0] << " "<< prob[1] << " "<< x[0] << " "<< features <<endl;
+  int num_clas = 1;
+  std::vector<float> prob_class(num_clas,0);
+  for(int cla = 0; cla < num_clas; cla++ )
+  {
+    Mat weight_class = _classiferMat->weights.row(cla);
+    prob_class[cla] = weight_class.dot(features) + _classiferMat->bias[cla];
+  }
+  // float sum_of_elems = std::accumulate(prob_class.begin(),prob_class.end(),0);
+  // cerr<<"SVM: "<< prob_class[0]  << endl;
+  return prob_class[0];//sum_of_elems;
 }
 
 void 
@@ -121,6 +153,32 @@ SVMLinear::setClassWeights(
   _param.weight = (double*)calloc(2, sizeof(double));
   _param.weight[0] = wtneg;
   _param.weight[1] = wtpos;
+}
+
+void 
+SVMLinear::getDecisionFunction()
+{
+  _classiferMat = new struct SVM_Mat;
+  //get parameter describing classifier
+  int num_feature = get_nr_feature(_classifier);
+  int num_classes = 1;//get_nr_class(_classifier);
+  _classiferMat->weights = Mat::zeros(Size(num_feature,num_classes), CV_32FC1);
+  _classiferMat->bias.resize(num_classes);
+  //extract weights and bias
+  for(int lab = 0; lab < num_classes; lab++)
+  {
+    for(int feat = 0; feat < num_feature; feat++)
+    {
+      //extract weights
+      float weight = float(get_decfun_coef(_classifier, feat, lab));
+      _classiferMat->weights.at<float>(lab,feat) = weight;
+      // cerr<<feat <<" " << lab << " "<< weight << endl;
+    }
+    //extract bias
+    _classiferMat->bias[lab] = float(get_decfun_bias(_classifier, lab));
+
+  }
+  // cerr<<"SVM: "<< _classiferMat->bias[0]<< " "<< _classiferMat->bias[1]<< endl;
 }
 
 void 
@@ -236,14 +294,23 @@ SVMLinear::evalModel()
 }
 
 void 
-SVMLinear::saveModel(string name) 
+SVMLinear::saveModel( 
+                      string name
+                    , string nameMat
+                    ) 
 {
   save_model(name.c_str(), _classifier);
+  compress(*_classiferMat,nameMat);
 }
 void 
-SVMLinear::loadModel(string name) 
+SVMLinear::loadModel( 
+                      string name
+                    , string nameMat
+                    )
 {
-  _classifier = load_model(name.c_str());
+  _classifier   = load_model(name.c_str());
+  _classiferMat = new SVM_Mat;
+  load(*_classiferMat, nameMat);
 }
 
 SVMLinear::~SVMLinear()
@@ -268,6 +335,9 @@ SVMLinear::~SVMLinear()
     free_and_destroy_model(&_classifier);
     _classifier = NULL;
   }
+
+  if(_classiferMat != NULL)
+    delete _classiferMat;
 
   
 }

@@ -36,6 +36,7 @@ private:
   //learning algorithm
   SVMLinear*       _comparatorLinear = NULL;
   std::string      _pathComparator;
+  std::string      _pathComparatorMat;
   float            _threshold;
 
 };

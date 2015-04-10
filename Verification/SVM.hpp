@@ -19,8 +19,8 @@ public:
   //predict probability of assignes as same class
   float predict_prob(cv::Mat& features);
   //save and load model
-  void saveModel(std::string name);
-  void loadModel(std::string name);
+  void saveModel(std::string name, std::string nameMat);
+  void loadModel(std::string name, std::string nameMat);
   //convert Mat to format for LIBLIBEAR
   void loadData(const cv::Mat &features, const std::vector<int> &labels);
   // test model on loaded set
@@ -34,11 +34,17 @@ private:
   void prepareData(cv::Mat& features, feature_node **x);
   // set class weights
   void setClassWeights(double wtpos, double wtneg);
+  //extract weight from learned model
+  void getDecisionFunction();
  
 
   struct problem   _data;       // first half is positive and second half is negative
   struct parameter _param;    // training parameters
   struct model    *_classifier;  // trained classifier
+  //extracted weights from SVM, need for probability estimation
+  struct SVM_Mat  *_classiferMat = NULL;
+  // cv::Mat          _classifierWeights;
+  // std::vector<float>    _classifierBias;
 
   
 };
