@@ -1,8 +1,8 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-19 13:08:33
-* @Last Modified 2015-04-10
-* @Last Modified time: 2015-04-10 14:54:18
+* @Last Modified 2015-04-13
+* @Last Modified time: 2015-04-13 09:08:38
 */
 
 #include "SVM.hpp"
@@ -74,6 +74,7 @@ SVMLinear::predict_prob(Mat& features)
   // prepareData(features, x);
   // double prob[2];
   // int lable = predict_probability(_classifier, x[0] ,&prob[0]);
+  // int label = predict(_classifier, x[0]);//,prob);
   // cerr<<"prob: "<< prob[0] << " "<< prob[1] << " "<< x[0] << " "<< features <<endl;
   int num_clas = 1;
   std::vector<float> prob_class(num_clas,0);
@@ -83,7 +84,8 @@ SVMLinear::predict_prob(Mat& features)
     prob_class[cla] = weight_class.dot(features) + _classiferMat->bias[cla];
   }
   // float sum_of_elems = std::accumulate(prob_class.begin(),prob_class.end(),0);
-  // cerr<<"SVM: "<< prob_class[0]  << endl;
+  // if(label)
+  //  cerr<<"SVM: "<< prob_class[0] <<" Label: "<< label  << endl;
   return prob_class[0];//sum_of_elems;
 }
 

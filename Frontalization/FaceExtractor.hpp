@@ -15,7 +15,7 @@ public:
   void getFrontalFace(cv::Mat& images, cv::Mat& outFrontal);
   ~FaceExtractor();
 
-
+  std::vector<cv::Rect> _faceRect;
 private:
   FaceAttribute*    _faceatt;
   CameraModel*      _camera;

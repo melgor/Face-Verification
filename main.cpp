@@ -1,11 +1,12 @@
 /*
 * @Author: melgor
 * @Date:   2014-05-26 22:22:02
-* @Last Modified 2015-04-10
+* @Last Modified 2015-04-13
 */
 #include <chrono>
 #include <iostream>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 #include "Frontalization/FaceExtractor.hpp"
 #include "Net/FetureExtractor.hpp"
 #include "Verification/Verificator.hpp"
@@ -108,24 +109,52 @@ int main(int argc, char **argv)
     FaceExtractor front(conf);
     FetureExtractor net_ext(conf);
     FaceDataBase face_data(conf);
-
-    //get frontal face
-    cv::Mat image = cv::imread(conf.nameScene);
-    std::vector<cv::Mat> v(1,image);
-    std::vector<cv::Mat> outFrontal;
-    auto t12 = std::chrono::high_resolution_clock::now();
-    front.getFrontalFace(v,outFrontal);
-    //extract feature
-    cv::Mat features;
-    net_ext.extractFeature(outFrontal[0],features);
-    //classify image
-    int label = face_data.returnClosestID(features);
-    auto t22 = std::chrono::high_resolution_clock::now();
-    std::cerr<<"Label: "<< label << std::endl;
-    std::cout << "program took "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
-            << " milliseconds\n";
-    cv::imwrite("demo.jpg",outFrontal[0]);
+    std::vector<std::string> splitteds;
+    boost::split(splitteds, conf.nameScene, boost::is_any_of(","));
+    for(auto& scene : splitteds)
+    {
+      //get frontal face
+      cv::Mat image = cv::imread(scene);
+      std::vector<cv::Mat> v(1,image);
+      std::vector<cv::Mat> outFrontal;
+      #ifdef __MSTIME
+      auto t12 = std::chrono::high_resolution_clock::now();
+      #endif
+      front.getFrontalFace(v,outFrontal);
+      int num_face = 0;
+      for(auto& face : outFrontal)
+      {
+        //extract feature
+        cv::Mat features;
+        #ifdef __MSTIME
+        auto t12Ef = std::chrono::high_resolution_clock::now();
+        #endif
+        net_ext.extractFeature(face,features);
+        #ifdef __MSTIME
+        auto t22Ef = std::chrono::high_resolution_clock::now();
+        std::cout << "Feature Extraction took "
+                << std::chrono::duration_cast<std::chrono::milliseconds>(t22Ef - t12Ef).count()
+                << " milliseconds\n";
+        #endif              
+        //classify image
+        std::string label = face_data.returnClosestIDName(features);
+        std::cerr<<"Label: "<< label << std::endl;
+        cv::putText(image, label, front._faceRect[num_face].tl() + cv::Point(50,50), 
+              cv::FONT_HERSHEY_COMPLEX_SMALL, 0.7, cvScalar(255,255,255), 1, CV_AA);
+        cv::rectangle(image,front._faceRect[num_face],cv::Scalar::all(255),3);
+        num_face++;
+        // cv::imwrite("demo.jpg",outFrontal[0]);
+      }
+      #ifdef __MSTIME
+      auto t22 = std::chrono::high_resolution_clock::now();
+      std::cout << "program took "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
+              << " milliseconds\n";
+      #endif
+      cv::namedWindow("Demo",CV_WINDOW_AUTOSIZE );
+      cv::imshow("Demo",image);
+      cv::waitKey();
+    }
     // cv::namedWindow("frontalize",CV_WINDOW_NORMAL);
     // cv::imshow("frontalize",outFrontal[0]);
     // cv::waitKey();

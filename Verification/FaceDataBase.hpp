@@ -9,7 +9,8 @@ class FaceDataBase
 {
 public:
   FaceDataBase(struct Configuration& config);
-  int returnClosestID(cv::Mat& feature);
+  int         returnClosestID(cv::Mat& feature);
+  std::string returnClosestIDName(cv::Mat& feature);
   ~FaceDataBase();
 
 private:
@@ -22,6 +23,7 @@ private:
 
   struct Features*         _dataFeatures = NULL;
   std::vector<std::string> _labelsNames;
+  std::string              _unknown;
   //configuration
   std::string      _metric;
   std::string      _pathFaceData;

@@ -1,13 +1,13 @@
 /* 
 * @Author: melgor
 * @Date:   2015-02-09 10:07:08
-* @Last Modified 2015-04-10
-* @Last Modified time: 2015-04-10 14:50:33
+* @Last Modified 2015-04-13
+* @Last Modified time: 2015-04-13 12:37:27
 */
 
 #include "FaceAttribute.hpp"
 #include <dlib/opencv.h>
-
+#include <chrono>
 
 using namespace std;
 using namespace cv;
@@ -46,7 +46,17 @@ FaceAttribute::detectFaceAndPoint(
     if (_resizeImageRatio != 1.0)
       cv::resize(img, img, cv::Size(), _resizeImageRatio,_resizeImageRatio, cv::INTER_CUBIC);
     dlib::cv_image<dlib::bgr_pixel> cimg(img);
+    #ifdef __MSTIME
+    auto t12 = std::chrono::high_resolution_clock::now();
+    #endif
     vector<dlib::rectangle> detected_faces = _frontalFaceDetector(cimg);
+    #ifdef __MSTIME
+    auto t22 = std::chrono::high_resolution_clock::now();
+    std::cout  << "Face Detection took "
+               << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
+               << " milliseconds\n";
+    #endif
+
     if (!detected_faces.size())
     {
       // cerr<<"No Face Detected"<<endl;
@@ -61,6 +71,9 @@ FaceAttribute::detectFaceAndPoint(
     //2. For each face detect their facial points
     vector<dlib::full_object_detection> shapes;
     Rect image_rect(cv::Point(), img.size());
+    #ifdef __MSTIME
+    t12 = std::chrono::high_resolution_clock::now();
+    #endif
     for (auto& face_rect : detected_faces)
     {    
         Rect face_cv(cv::Point(face_rect.left(),face_rect.top()),cv::Point(face_rect.right(),face_rect.bottom()));
@@ -76,6 +89,12 @@ FaceAttribute::detectFaceAndPoint(
         getBoundingRect(image_rect,face_rect, out);
         face_rectangle.push_back( out);
     }
+    #ifdef __MSTIME
+    t22 = std::chrono::high_resolution_clock::now();
+    std::cout  << "Facial Points took "
+               << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
+               << " milliseconds\n";
+    #endif               
 
     facesPoints.reserve(shapes.size());
     //3. Transform point to OpenCV format

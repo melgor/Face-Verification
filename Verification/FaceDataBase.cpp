@@ -1,13 +1,15 @@
 /* 
 * @Author: melgor
 * @Date:   2015-04-09 14:53:35
-* @Last Modified 2015-04-10
-* @Last Modified time: 2015-04-10 14:49:01
+* @Last Modified 2015-04-13
+* @Last Modified time: 2015-04-13 13:56:06
 */
 
 #include "FaceDataBase.hpp"
 #include "Distances.hpp"
 #include "Utils/Serialization.hpp"
+#include <sstream>
+#include <fstream>
 #include <chrono>
 
 using namespace std;
@@ -35,6 +37,23 @@ FaceDataBase::FaceDataBase(struct Configuration& config)
   load(_maxValue, _pathScaler);
   //load learned model
   _comparatorLinear->loadModel(_pathComparator,_pathComparatorMat);
+  //load labels name
+  ifstream infile(config.faceLabels);
+  for( string line; getline( infile, line ); )
+  {
+    _labelsNames.push_back(line);
+  }
+  _unknown = "Unknown";
+
+}
+
+string 
+FaceDataBase::returnClosestIDName(cv::Mat& feature)
+{
+  int label = returnClosestID(feature);
+  if(label < 0)
+    return _unknown;
+  return _labelsNames[label];
 }
 
 //return id >= 0 if find in database. Otherwise, not
@@ -52,6 +71,8 @@ FaceDataBase::returnClosestID(Mat& feature)
     scaleData(data_feature,scaled_feature2);
     float prob_value = compare(scaled_feature,scaled_feature2);
     result_prob.push_back(make_pair(prob_value, _dataFeatures->labels[row]));
+    // if(prob_value > 0.0)
+    //   cerr<<"Prob: "<< prob_value <<" Label: "<< _dataFeatures->labels[row] << endl;
   }
 
   auto result = std::max_element(result_prob.begin(), result_prob.end()

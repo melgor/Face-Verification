@@ -50,6 +50,7 @@ struct Configuration
   std::string  pathComparatorMat;
   std::string  pathScaler;
   std::string  faceData;
+  std::string  faceLabels;
   float        threshold;
   bool         scaleFeature;
 
@@ -97,6 +98,7 @@ struct Configuration
     pathScaler        = pt.get<std::string>("Verification.ScalerPath");
     scaleFeature      = pt.get<bool>("Verification.ScaleFeature");
     faceData          = pt.get<std::string>("Verification.FaceData");
+    faceLabels        = pt.get<std::string>("Verification.FaceLabels");
   }
 
   void print()
