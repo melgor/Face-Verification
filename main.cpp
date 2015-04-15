@@ -1,7 +1,7 @@
 /*
 * @Author: melgor
 * @Date:   2014-05-26 22:22:02
-* @Last Modified 2015-04-13
+* @Last Modified 2015-04-15
 */
 #include <chrono>
 #include <iostream>
@@ -164,17 +164,13 @@ int main(int argc, char **argv)
       std::cerr<<"Create model 2D"<<endl;
       cv::Mat image = cv::imread(conf.nameScene);
       FaceAttribute faceAtt(conf);
-      std::vector<cv::Mat> v(1,image);
-      std::vector<FacePoints> face_points;
-      std::vector<cv::Rect> rect;
-      faceAtt.detectFaceAndPoint(v, face_points, rect);
-      std::cerr<<image.size() << " "<< rect[0] << std::endl;
-      cv::Mat cc = v[0](rect[0]).clone();
+      FacePoints face_points;
+      faceAtt.detectFacePoint(image, face_points);
       std::vector<int> values_point;
       std::vector<int> left_eye;
       std::vector<int> right_eye;
       //nose
-      values_point.push_back(30);
+      // values_point.push_back(30);
       //left eye
       left_eye.push_back(36);
       left_eye.push_back(37);
@@ -189,35 +185,36 @@ int main(int argc, char **argv)
       right_eye.push_back(45);
       right_eye.push_back(46);
       right_eye.push_back(47);
-      //left mouth
-      values_point.push_back(48);
-      //right mouth
-      values_point.push_back(54);
-      //middle mouth
+      // //left mouth
+      // values_point.push_back(48);
+      // //right mouth
+      // values_point.push_back(54);
+      // //middle mouth
       values_point.push_back(62);
-      
+
       std::vector<cv::Point2f> point_model_6,point_model_68;
 
       for(auto& elem : values_point)
-      { 
-        point_model_6.push_back(face_points[0][elem]);
-  //       cv::Mat cct = cc.clone();
-  //       cv::circle(cct,face_points[0][elem],3,cv::Scalar::all(255),-1);
-  //       cv::imwrite(std::to_string(elem) + "facepoint.jpg",cct);
+      {
+        point_model_6.push_back(face_points[elem]);
+        // cv::Mat cct = image.clone();
+        // cv::circle(cct,face_points[0][elem],3,cv::Scalar::all(255),-1);
+        // cv::imwrite(std::to_string(elem) + "facepoint.jpg",cct);
+        // cerr<<"6: "<<face_points[0][elem]<<endl;
 
       }
       std::vector<cv::Point2f> left_eye_model;
       for(auto& elem : left_eye)
       {
-        left_eye_model.push_back(face_points[0][elem]);
+        left_eye_model.push_back(face_points[elem]);
       }
       std::vector<cv::Point2f> right_eye_model;
       for(auto& elem : right_eye)
       {
-        right_eye_model.push_back(face_points[0][elem]);
+        right_eye_model.push_back(face_points[elem]);
       }
       //collect all 68 points
-      for(auto& elem : face_points[0])
+      for(auto& elem : face_points)
       {
         point_model_68.push_back(elem);
       }
@@ -225,14 +222,12 @@ int main(int argc, char **argv)
       cv::Point2f center_left_eye, center_right_eye;
       calculateMeanPoint(left_eye_model,center_left_eye);
       calculateMeanPoint(right_eye_model,center_right_eye);
-      
       point_model_6.push_back(center_left_eye);
       point_model_6.push_back(center_right_eye);
-      std::string name = "model2d_6poinst.xml";
-      savePoints(name,point_model_6);
-      name = "model2d_68poinst.xml";
-      savePoints(name,point_model_68);
-      
+
+      savePoints(conf.model2D_6,point_model_6);
+      savePoints(conf.model2D_68,point_model_68);
+
   }
   return 0;
 }

@@ -1,8 +1,8 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-11 17:00:34
-* @Last Modified 2015-03-19
-* @Last Modified time: 2015-03-19 11:56:28
+* @Last Modified 2015-04-15
+* @Last Modified time: 2015-04-15 11:28:34
 */
 #include "AffineModel.hpp"
 #include <opencv2/calib3d/calib3d.hpp>
@@ -15,11 +15,11 @@ AffineModel::AffineModel(Configuration& config)
   loadPoints(config.model2D_6,_pointModel6);
   loadPoints(config.model2D_68,_pointModel68);
   //nose
-  _idPoints.push_back(30);
+  // _idPoints.push_back(30);
   //left mouth
-  _idPoints.push_back(48);
+  // _idPoints.push_back(48);
   //right mouth
-  _idPoints.push_back(54);
+  // _idPoints.push_back(54);
   //middle mouth
   _idPoints.push_back(62);
   
@@ -86,11 +86,14 @@ AffineModel::estimateCamera(
   face_point_for_homo[i+1] = center_right_eye;
   //get Transformation Matrix
 
-  cameraModels = estimateRigidTransform(face_point_for_homo, _pointModel6, 0 );
+  // cameraModels = estimateRigidTransform(face_point_for_homo, _pointModel6, 0 );
+  cameraModels = getAffineTransform(face_point_for_homo, _pointModel6);
   // if (cameraModels.empty())
   //   cameraModels = estimateRigidTransform(face_point_for_homo, _pointModel6, 1 );
   // cameraModels = findHomography(face_point_for_homo, _pointModel6, 0 );
-}              
+  // cerr<<"C: "<<cameraModels << endl;
+  // drawFacePoints(face_point_for_homo, imageSize);
+}
 
 FacePoints& 
 AffineModel::getModel6()
@@ -102,7 +105,33 @@ FacePoints&
 AffineModel::getModel68()
 {
   return _pointModel68;
-}            
+}
+
+void
+AffineModel::drawFacePoints(
+                             FacePoints& currentFacePoints
+                            ,Size&       imageSize)
+{
+  //draw points from base model
+  Mat image_base = Mat::zeros(Size(320,407),CV_8UC3);
+  for(uint j = 0; j <   _pointModel6.size(); j++)
+  {
+    cv::circle(image_base,_pointModel6[j],3,cv::Scalar::all(255),-1);
+  }
+  //draw points from current model
+  Mat image_model = Mat::zeros(imageSize,CV_8UC3);
+  cerr<<image_model.size()<< endl;
+  for(uint j = 0; j <   _pointModel6.size(); j++)
+  {
+    cv::circle(image_model, currentFacePoints[j],3,cv::Scalar::all(255),-1);
+  }
+
+  namedWindow("model", WINDOW_NORMAL);
+  namedWindow("face", WINDOW_NORMAL);
+  imshow("model",image_base);
+  imshow("face",image_model);
+  waitKey();
+}
 
 AffineModel::~AffineModel()
 {

@@ -20,9 +20,11 @@ public:
   ~AffineModel();
 
   FacePoints& getModel6();  
-  FacePoints& getModel68();      
+  FacePoints& getModel68();
 
  private: 
+  void drawFacePoints( FacePoints& currentFacePoints,
+                       cv::Size&       imageSize   );
   FacePoints       _pointModel6;
   FacePoints       _pointModel68;
   std::vector<int> _idPoints;
