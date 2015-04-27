@@ -1,7 +1,7 @@
 /*
 * @Author: melgor
 * @Date:   2014-05-26 22:22:02
-* @Last Modified 2015-04-15
+* @Last Modified 2015-04-27
 */
 #include <chrono>
 #include <iostream>
@@ -11,6 +11,7 @@
 #include "Net/FetureExtractor.hpp"
 #include "Verification/Verificator.hpp"
 #include "Verification/FaceDataBase.hpp"
+#include "Utils/Daemon.hpp"
 
 using namespace std;
 int main(int argc, char **argv)
@@ -81,7 +82,7 @@ int main(int argc, char **argv)
       }
       catch (const fs::filesystem_error& ex)
       {
-      std::cerr << ex.what() << '\n';
+        std::cerr << ex.what() << '\n';
       }
     }
     else
@@ -158,6 +159,11 @@ int main(int argc, char **argv)
     // cv::namedWindow("frontalize",CV_WINDOW_NORMAL);
     // cv::imshow("frontalize",outFrontal[0]);
     // cv::waitKey();
+  }
+  else if (conf.mode == "daemon")
+  {
+    Daemon daemon(conf);
+    daemon.run();
   }
   else if (conf.mode == "create_model")
   {

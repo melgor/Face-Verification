@@ -10,6 +10,7 @@
 class FaceExtractor
 {
 public:
+  FaceExtractor() {};
   FaceExtractor(Configuration& config);
   void getFrontalFace(std::vector<cv::Mat>& images, std::vector<cv::Mat>& outFrontal);
   void getFrontalFace(cv::Mat& images, cv::Mat& outFrontal);

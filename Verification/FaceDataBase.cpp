@@ -1,8 +1,8 @@
 /* 
 * @Author: melgor
 * @Date:   2015-04-09 14:53:35
-* @Last Modified 2015-04-13
-* @Last Modified time: 2015-04-13 13:56:06
+* @Last Modified 2015-04-27
+* @Last Modified time: 2015-04-27 15:22:49
 */
 
 #include "FaceDataBase.hpp"
@@ -60,7 +60,23 @@ FaceDataBase::returnClosestIDName(cv::Mat& feature)
 int
 FaceDataBase::returnClosestID(Mat& feature)
 {
+  string name;
+  float score;
+  returnClosestIDNameScore(feature,name,score);
+
+  return score;
+}
+
+void 
+FaceDataBase::returnClosestIDNameScore( 
+                                        Mat& feature
+                                      , string& name
+                                      , float& score
+                                      )
+{
+  #ifdef __MSTIME
   auto t12 = std::chrono::high_resolution_clock::now();
+  #endif
   vector<pair<float,int>> result_prob;
   Mat scaled_feature, scaled_feature2;
   scaleData(feature,scaled_feature);
@@ -81,15 +97,25 @@ FaceDataBase::returnClosestID(Mat& feature)
                                     {
                                       return f1.first < f2.first;
                                     });
+  #ifdef __MSTIME
   auto t22 = std::chrono::high_resolution_clock::now();
   std::cout  << "FaceDataBase took "
              << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
              << " milliseconds\n";
-  cerr<<"Max prob: "<< (*result).first << endl;
+   #endif
+  LOG(WARNING)<<"Max prob: "<< (*result).first;
   if ((*result).first > _threshold)
-    return (*result).second;
+  {
+    score = (*result).first;
+    name = _labelsNames[(*result).second];
+  }
+  else
+  {
+    score = -1;
+    name  = _unknown;
+  }
 
-  return -1;
+ 
 }
 
 

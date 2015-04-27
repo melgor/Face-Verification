@@ -8,9 +8,11 @@
 class FaceDataBase
 {
 public:
+  FaceDataBase(){};
   FaceDataBase(struct Configuration& config);
   int         returnClosestID(cv::Mat& feature);
   std::string returnClosestIDName(cv::Mat& feature);
+  void returnClosestIDNameScore(cv::Mat& feature, std::string& name, float& score);
   ~FaceDataBase();
 
 private:

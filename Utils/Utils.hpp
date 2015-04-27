@@ -12,19 +12,21 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <fstream>
-#include "Parser.hpp"
 #include <memory>
-#include "opencv2/opencv.hpp"
+#include <glog/logging.h>
+#include <opencv2/opencv.hpp>
+#include "Parser.hpp"
 
 struct Configuration
 {
   bool         reset;
   //mode of program
   std::string  mode;
+  std::string  mainFolder;
   //input
   std::string  nameScene;
   std::string  folderpath;
-  //face detection
+  //Face Detection
   std::string  posemodel;
   std::string  facemodel;
   float        padDetection;
@@ -53,6 +55,9 @@ struct Configuration
   std::string  faceLabels;
   float        threshold;
   bool         scaleFeature;
+  //daemon
+  std::string watchFolder; 
+  std::string pathLog;
 
 
 
@@ -69,60 +74,83 @@ struct Configuration
     boost::property_tree::ptree pt;
     boost::property_tree::ini_parser::read_ini(parser.config, pt);
     //mode
-    mode           = pt.get<std::string>("Mode.Mode");
+    mode               = pt.get<std::string>("Mode.Mode");
+    mainFolder         = pt.get<std::string>("Mode.Folder");
     //face detection
-    posemodel      = pt.get<std::string>("FaceDecetion.PoseModel");
-    facemodel      = pt.get<std::string>("FaceDecetion.FaceModel");
-    padDetection   = pt.get<float>("FaceDecetion.PadDetection");
-    resizeImageRatio =  pt.get<float>("FaceDecetion.ResizeImageRatio");
-    calibOption      =  pt.get<std::string>("FaceDecetion.CalibOption");
-    symetry          =  pt.get<bool>("FaceDecetion.Symetry");
-    model2D_6        =  pt.get<std::string>("FaceDecetion.Model2D_6points");
-    model2D_68       =  pt.get<std::string>("FaceDecetion.Model2D_68points");
+    posemodel          = mainFolder + pt.get<std::string>("FaceDecetion.PoseModel");
+    facemodel          = mainFolder + pt.get<std::string>("FaceDecetion.FaceModel");
+    padDetection       = pt.get<float>("FaceDecetion.PadDetection");
+    resizeImageRatio   = pt.get<float>("FaceDecetion.ResizeImageRatio");
+    calibOption        = pt.get<std::string>("FaceDecetion.CalibOption");
+    symetry            = pt.get<bool>("FaceDecetion.Symetry");
+    model2D_6          = mainFolder + pt.get<std::string>("FaceDecetion.Model2D_6points");
+    model2D_68         = mainFolder + pt.get<std::string>("FaceDecetion.Model2D_68points");
     //net 
-    prototxt       = pt.get<std::string>("Net.Prototxt");
-    caffemodel     = pt.get<std::string>("Net.CaffeModel");
-    layer          = pt.get<std::string>("Net.Layer");
-    gpu            = pt.get<bool>("Net.GPU");
-    gpuID          = pt.get<int>("Net.GPU_ID");
+    prototxt           = mainFolder + pt.get<std::string>("Net.Prototxt");
+    caffemodel         = mainFolder + pt.get<std::string>("Net.CaffeModel");
+    layer              = pt.get<std::string>("Net.Layer");
+    gpu                = pt.get<bool>("Net.GPU");
+    gpuID              = pt.get<int>("Net.GPU_ID");
     //Extractor
-    extractorFolder    = pt.get<std::string>("Extract.Folder");
-    extractorImageList = pt.get<std::string>("Extract.ImageListDB");
+    extractorFolder    = mainFolder + pt.get<std::string>("Extract.Folder");
+    extractorImageList = mainFolder + pt.get<std::string>("Extract.ImageListDB");
     //Verificator
-    trainData         = pt.get<std::string>("Verification.TrainData");
-    valData           = pt.get<std::string>("Verification.ValData");
-    metric            = pt.get<std::string>("Verification.Metric");
-    pathComparator    = pt.get<std::string>("Verification.ComparatorPath");
-    pathComparatorMat = pt.get<std::string>("Verification.ComparatorPathMat");
-    threshold         = pt.get<float>("Verification.Thres");
-    pathScaler        = pt.get<std::string>("Verification.ScalerPath");
-    scaleFeature      = pt.get<bool>("Verification.ScaleFeature");
-    faceData          = pt.get<std::string>("Verification.FaceData");
-    faceLabels        = pt.get<std::string>("Verification.FaceLabels");
+    trainData          = mainFolder + pt.get<std::string>("Verification.TrainData");
+    valData            = mainFolder + pt.get<std::string>("Verification.ValData");
+    metric             = pt.get<std::string>("Verification.Metric");
+    pathComparator     = mainFolder + pt.get<std::string>("Verification.ComparatorPath");
+    pathComparatorMat  = mainFolder + pt.get<std::string>("Verification.ComparatorPathMat");
+    threshold          = pt.get<float>("Verification.Thres");
+    pathScaler         = mainFolder + pt.get<std::string>("Verification.ScalerPath");
+    scaleFeature       = pt.get<bool>("Verification.ScaleFeature");
+    faceData           = mainFolder + pt.get<std::string>("Verification.FaceData");
+    faceLabels         = mainFolder + pt.get<std::string>("Verification.FaceLabels");
+    //Daemon
+    watchFolder        = mainFolder + pt.get<std::string>("Daemon.WatchFolder");
+    pathLog            = mainFolder + pt.get<std::string>("Daemon.LogFolder");
   }
 
   void print()
   {
-    std::cerr<<"-------------------------------------" << std::endl;
-    std::cerr<<"Configuration " << std::endl;
-    std::cerr<<"nameScene: "<<nameScene << std::endl;
-    std::cerr<<"folderpath: "<<folderpath << std::endl;
-    std::cerr<<"mode: "<<mode << std::endl;
-    std::cerr<<"------------Face Detection----------------" << std::endl;
-    std::cerr<<"posemodel: "<<posemodel << std::endl;
-    std::cerr<<"facemodel: "<<facemodel << std::endl;
-    std::cerr<<"padDetection: "<<padDetection << std::endl;
-    std::cerr<<"ResizeImageRatio: "<<resizeImageRatio << std::endl;
-    std::cerr<<"CalibOption: "<<calibOption << std::endl;
-    std::cerr<<"Symetry: "<<symetry << std::endl;
-    std::cerr<<"Model2D_6: "<<model2D_6 << std::endl;
-    std::cerr<<"Model2D_68: "<<model2D_68 << std::endl;
-    std::cerr<<"------------Net---------------------------" << std::endl;
-    std::cerr<<"prototxt: "<<prototxt << std::endl;
-    std::cerr<<"caffemodel: "<<caffemodel << std::endl;
-    std::cerr<<"layer: "<<layer << std::endl;
-    std::cerr<<"gpu: "<<gpu << std::endl;
-    std::cerr<<"-------------------------------------" << std::endl;
+    LOG(WARNING)<<"-------------------------------------";
+    LOG(WARNING)<<"------------Configuration----------------";
+    LOG(WARNING)<<"NameScene:  "  <<nameScene;
+    LOG(WARNING)<<"Folderpath: "  <<folderpath;
+    LOG(WARNING)<<"Mode:       "  << mode;
+    LOG(WARNING)<<"Main:       "  << mainFolder;
+    LOG(WARNING)<<"------------Face Detection----------------";
+    LOG(WARNING)<<"Posemodel:        "<<posemodel;
+    LOG(WARNING)<<"Facemodel:        "<<facemodel;
+    LOG(WARNING)<<"PadDetection:     "<<padDetection;
+    LOG(WARNING)<<"ResizeImageRatio: "<<resizeImageRatio;
+    LOG(WARNING)<<"CalibOption:      "<<calibOption;
+    LOG(WARNING)<<"Symetry:          "<<symetry;
+    LOG(WARNING)<<"Model2D_6:        "<<model2D_6;
+    LOG(WARNING)<<"Model2D_68:       "<<model2D_68;
+    LOG(WARNING)<<"------------Net---------------------------";
+    LOG(WARNING)<<"Prototxt:       "<<prototxt;
+    LOG(WARNING)<<"Caffemodel:     "<<caffemodel;
+    LOG(WARNING)<<"Layer:          "<<layer;
+    LOG(WARNING)<<"Gpu:            "<<gpu;
+    LOG(WARNING)<<"GpuID:          "<<gpuID;
+    LOG(WARNING) <<"-------------Extractor---------";
+    LOG(WARNING) <<"RxtractorFolder:    "<< extractorFolder;
+    LOG(WARNING) <<"RxtractorImageList: "<< extractorImageList;
+    LOG(WARNING) <<"-------------Verification---------";
+    LOG(WARNING) <<"TrainData:         "<<trainData;
+    LOG(WARNING) <<"ValData:           "<<valData;
+    LOG(WARNING) <<"FaceData:          "<<faceData;
+    LOG(WARNING) <<"FaceLabels:        "<<faceLabels;
+    LOG(WARNING) <<"Metric:            "<<metric;
+    LOG(WARNING) <<"Thres:             "<<threshold;
+    LOG(WARNING) <<"ScaleFeature:      "<<scaleFeature;
+    LOG(WARNING) <<"ComparatorPath:    "<<pathComparator;
+    LOG(WARNING) <<"ComparatorPathMat: "<<pathComparatorMat;
+    LOG(WARNING) <<"ScalerPath:        "<<pathScaler;
+    LOG(WARNING) <<"-------------Daemon---------";
+    LOG(WARNING) <<"WatchFolder:     "<<watchFolder;
+    LOG(WARNING) <<"LogFolder:       "<<pathLog;
+    LOG(WARNING)<<"-------------------------------------";
   };
 
 };

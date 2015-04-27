@@ -1,8 +1,8 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-03 15:35:29
-* @Last Modified 2015-04-10
-* @Last Modified time: 2015-04-10 15:55:07
+* @Last Modified 2015-04-27
+* @Last Modified time: 2015-04-27 10:43:21
 */
 #include <iostream>
 #include <fstream>
@@ -68,7 +68,7 @@ FetureExtractor::extractAllFeatures()
   }
   else
   {
-    std::cerr << "Unable to open file";
+    LOG(WARNING) << "Unable to open file";
   }
 
   //serialize feature

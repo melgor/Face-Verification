@@ -1,13 +1,13 @@
 /* 
 * @Author: melgor
 * @Date:   2015-02-09 10:07:08
-* @Last Modified 2015-04-13
-* @Last Modified time: 2015-04-13 12:37:27
+* @Last Modified 2015-04-27
+* @Last Modified time: 2015-04-27 14:30:49
 */
-
 #include "FaceAttribute.hpp"
 #include <dlib/opencv.h>
 #include <chrono>
+#include <glog/logging.h>
 
 using namespace std;
 using namespace cv;
@@ -29,6 +29,7 @@ FaceAttribute::FaceAttribute(Configuration& config)
   _frontalFaceDetector = dlib::get_frontal_face_detector();
   _padValue            = config.padDetection;
   _resizeImageRatio    = config.resizeImageRatio;
+  DLOG(WARNING) << "Create Resize : "<< _resizeImageRatio;
   dlib::deserialize(config.posemodel) >> _poseModel;
 }
 
@@ -41,10 +42,14 @@ FaceAttribute::detectFaceAndPoint(
 {
   for(auto& img : faces)
   {
+    DLOG(WARNING) << "Image: "<< img.size();
     //1.Detect face in image
     // Optional resizing of image
     if (_resizeImageRatio != 1.0)
+    {
+      DLOG(WARNING) << "Resize: "<< _resizeImageRatio;
       cv::resize(img, img, cv::Size(), _resizeImageRatio,_resizeImageRatio, cv::INTER_CUBIC);
+    }
     dlib::cv_image<dlib::bgr_pixel> cimg(img);
     #ifdef __MSTIME
     auto t12 = std::chrono::high_resolution_clock::now();
@@ -56,17 +61,17 @@ FaceAttribute::detectFaceAndPoint(
                << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
                << " milliseconds\n";
     #endif
-
+         
     if (!detected_faces.size())
     {
-      // cerr<<"No Face Detected"<<endl;
+      DLOG(WARNING) <<"No Face Detected";
       // return;
       dlib::rectangle rect(img.size().width,img.size().height);
       detected_faces.push_back(rect);
     }
     else
     {
-      // cerr<<"Detected: "<< detected_faces.size() << endl;
+      DLOG(WARNING) << "Detected Faces: "<< detected_faces.size();      
     }
     //2. For each face detect their facial points
     vector<dlib::full_object_detection> shapes;
@@ -78,7 +83,6 @@ FaceAttribute::detectFaceAndPoint(
     {    
         Rect face_cv(cv::Point(face_rect.left(),face_rect.top()),cv::Point(face_rect.right(),face_rect.bottom()));
         Rect out;
-        // cerr<<"Intersection: "<< rectIntersection(image_rect,face_cv)<<endl;
         if(rectIntersection(image_rect,face_cv) != 1.0)
         {
           //rectangle is outside image
@@ -167,7 +171,7 @@ FaceAttribute::getBoundingRect(
      right_bottom = Point(faceRect.right() + width_pad, faceRect.bottom() + height_pad );
      // cerr<<"W: "<< width_pad <<"   "<< imageRect <<"  "<< left_top << "    "<< right_bottom <<endl; 
   }
-  // cerr<<"W: "<< width_pad <<"   "<< imageRect <<"  "<< left_top << "    "<< right_bottom <<endl; 
+  DLOG(WARNING) <<"W: "<< width_pad <<"   "<< imageRect <<"  "<< left_top << "    "<< right_bottom; 
   outRect = Rect(left_top,right_bottom);
 }
 

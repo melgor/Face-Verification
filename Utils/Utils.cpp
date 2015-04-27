@@ -1,7 +1,7 @@
 /*
 * @Author: melgor
 * @Date:   2014-05-27 17:08:52
-* @Last Modified 2015-03-13
+* @Last Modified 2015-04-27
 */
 
 #include <boost/filesystem.hpp>
@@ -157,8 +157,6 @@ float
 rectIntersection(cv::Rect& r1, cv::Rect& r2)
 {
   cv::Rect rect_over = r1 & r2;
-  // cv::Rect rect_min = r1 | r2;
-  std::cerr<<r1 << "  "<< r2 <<"  "<< rect_over << std::endl;
   return rect_over.area()/float(r2.area());
 }
 
