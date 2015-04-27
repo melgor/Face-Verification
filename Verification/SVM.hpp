@@ -2,7 +2,7 @@
 #define VERIFICATION_SVM_H
 
 #include <opencv2/core/core.hpp>
-#include <liblinear-1.96/linear.h>
+#include <liblinear/linear.h>
 #include "Utils/Utils.hpp"
 
 //Implement SVM for OpenCV using LibLinear
