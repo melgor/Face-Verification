@@ -1,8 +1,8 @@
 /* 
 * @Author: melgor
 * @Date:   2015-02-09 10:03:31
-* @Last Modified 2015-04-10
-* @Last Modified time: 2015-04-10 14:49:52
+* @Last Modified 2015-05-04
+* @Last Modified time: 2015-05-04 10:31:53
 */
 
 #include <opencv2/core/core.hpp>
@@ -35,10 +35,10 @@ CameraModel::estimateCamera(
                             , vector<Mat>& cameraModels
                             )
 {
-   for(uint i = 0; i < facesPoints.size(); i++)
-   {
-    doCalib(facesPoints[i], imageSize[0], cameraModels[i],i);
-   }
+  for(uint i = 0; i < facesPoints.size(); i++)
+  {
+    doCalib(facesPoints[i], imageSize[i], cameraModels[i],i);
+  }
 }
 
 void

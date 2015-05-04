@@ -19,7 +19,7 @@ public:
 	FaceAttribute(Configuration& config);
   //detect faces in images and find their face points
 	void detectFaceAndPoint( 
-                          std::vector<cv::Mat>& faces
+                          cv::Mat& img
                         , std::vector<FacePoints>& facesPoints
                         , std::vector<cv::Rect>& face_rectangle);
   //detect face point, where on each image is only one face

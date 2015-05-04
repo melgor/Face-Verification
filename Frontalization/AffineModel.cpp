@@ -1,8 +1,8 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-11 17:00:34
-* @Last Modified 2015-04-27
-* @Last Modified time: 2015-04-27 10:47:16
+* @Last Modified 2015-05-04
+* @Last Modified time: 2015-05-04 10:31:15
 */
 #include "AffineModel.hpp"
 #include <opencv2/calib3d/calib3d.hpp>
@@ -50,7 +50,7 @@ AffineModel::estimateCamera(
 {
    for(uint i = 0; i < facesPoints.size(); i++)
    {
-      estimateCamera(facesPoints[i], imageSize[0], cameraModels[i]);
+      estimateCamera(facesPoints[i], imageSize[i], cameraModels[i]);
    }
 }
 

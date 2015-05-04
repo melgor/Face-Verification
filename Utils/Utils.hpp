@@ -35,6 +35,7 @@ struct Configuration
   bool         symetry;
   std::string  model2D_6;
   std::string  model2D_68;
+  std::string  frontalization;
   //Net
   std::string  prototxt;
   std::string  caffemodel;
@@ -85,6 +86,7 @@ struct Configuration
     symetry            = pt.get<bool>("FaceDecetion.Symetry");
     model2D_6          = mainFolder + pt.get<std::string>("FaceDecetion.Model2D_6points");
     model2D_68         = mainFolder + pt.get<std::string>("FaceDecetion.Model2D_68points");
+    frontalization     = pt.get<std::string>("FaceDecetion.Frontalization");
     //net 
     prototxt           = mainFolder + pt.get<std::string>("Net.Prototxt");
     caffemodel         = mainFolder + pt.get<std::string>("Net.CaffeModel");

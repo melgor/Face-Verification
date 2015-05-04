@@ -1,8 +1,8 @@
 /* 
 * @Author: melgor
 * @Date:   2015-04-24 17:49:31
-* @Last Modified 2015-04-27
-* @Last Modified time: 2015-04-27 15:20:12
+* @Last Modified 2015-05-04
+* @Last Modified time: 2015-05-04 10:14:18
 */
 #include <exception>
 #include <iostream>
@@ -173,9 +173,8 @@ Daemon::runFaceVerification(string path)
   file_result.open (save_result);
   
   LOG(WARNING) <<"Image: "<< path_image << " Size: "<< image.size() <<" Result at: "<< save_result;
-  std::vector<cv::Mat> v(1,image);
   std::vector<cv::Mat> outFrontal;
-  _faceExt->getFrontalFace(v,outFrontal);
+  _faceExt->getFrontalFace(image,outFrontal);
   int num_face = 0;
   std::string name_label;
   float       score_label;

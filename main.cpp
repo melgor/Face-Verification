@@ -1,7 +1,7 @@
 /*
 * @Author: melgor
 * @Date:   2014-05-26 22:22:02
-* @Last Modified 2015-04-27
+* @Last Modified 2015-05-04
 */
 #include <chrono>
 #include <iostream>
@@ -64,10 +64,12 @@ int main(int argc, char **argv)
               path_save.push_back(out_path);
               std::cerr << "adding  " << itr->path().string() << std::endl;
               cv::Mat out, image = cv::imread(itr->path().string());
-              std::vector<cv::Mat> images(1,image), outs;
-              front.getFrontalFace(images,outs);
+              std::vector<cv::Mat>  outs;
+              front.getFrontalFace(image,outs);
               if (outs[0].size().width != 0)
                 cv::imwrite(out_path,outs[0]);
+              else
+                cv::imwrite(out_path,image);
             }
             ++itr;
           }
@@ -88,11 +90,10 @@ int main(int argc, char **argv)
     else
     {
       cv::Mat image = cv::imread(conf.nameScene);
-      std::vector<cv::Mat> v(1,image);
       std::vector<cv::Mat> outFrontal;
       FaceExtractor front(conf);
       auto t12 = std::chrono::high_resolution_clock::now();
-      front.getFrontalFace(v,outFrontal);
+      front.getFrontalFace(image,outFrontal);
       auto t22 = std::chrono::high_resolution_clock::now();
       std::cout << "program took "
             << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
@@ -114,14 +115,14 @@ int main(int argc, char **argv)
     boost::split(splitteds, conf.nameScene, boost::is_any_of(","));
     for(auto& scene : splitteds)
     {
+      std::cerr <<"Scene: "<< scene << std::endl;
       //get frontal face
-      cv::Mat image = cv::imread(scene);
-      std::vector<cv::Mat> v(1,image);
+      cv::Mat image = cv::imread(scene);;
       std::vector<cv::Mat> outFrontal;
       #ifdef __MSTIME
       auto t12 = std::chrono::high_resolution_clock::now();
       #endif
-      front.getFrontalFace(v,outFrontal);
+      front.getFrontalFace(image,outFrontal);
       int num_face = 0;
       for(auto& face : outFrontal)
       {
