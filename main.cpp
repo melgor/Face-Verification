@@ -108,6 +108,7 @@ int main(int argc, char **argv)
   }
   else if (conf.mode == "demo")
   {
+    if 
     FaceExtractor front(conf);
     FetureExtractor net_ext(conf);
     FaceDataBase face_data(conf);

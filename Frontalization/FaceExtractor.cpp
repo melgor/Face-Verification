@@ -2,7 +2,7 @@
 * @Author: blcv
 * @Date:   2015-03-10 11:14:56
 * @Last Modified 2015-05-04
-* @Last Modified time: 2015-05-04 11:39:24
+* @Last Modified time: 2015-05-04 12:50:34
 */
 
 #include "FaceExtractor.hpp"
@@ -62,7 +62,7 @@ FaceExtractor::getFrontalFace(
 void 
 FaceExtractor::getFrontalFace(
                                Mat& images
-                              , Mat& outFrontal
+                              ,Mat& outFrontal
                               )
 {
   //TODO: convert to new Flow +2D Transformation
@@ -70,34 +70,11 @@ FaceExtractor::getFrontalFace(
   auto t12 = std::chrono::high_resolution_clock::now();  
   FacePoints face_points,face_points_align;
   _faceatt->detectFacePoint(images,face_points);
-  auto t22 = std::chrono::high_resolution_clock::now();
-  std::cout << "detectFacePoint took "
-             << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
-             << " milliseconds\n";
-  LOG(WARNING)<<"Camera Model";
-  t12 = std::chrono::high_resolution_clock::now();
-  Mat camera_model_2D, camera_model_3D;
-  Size image_sizes = images.size();
-  //estimate align using 2D transformation
-  _affine->estimateCamera(face_points ,image_sizes, camera_model_2D);
-  //get align face and their face points
-  Mat face_align;
-  warpPerspective(images, face_align, camera_model_2D, cv::Size(400,400));
-  perspectiveTransform(face_points, face_points_align, camera_model_2D);
-  cv::imwrite("homo.jpg",face_align);
-  Size imageSizes_aling = Size(400,400);
-  
-  
-  _camera->estimateCamera(face_points_align, imageSizes_aling, camera_model_3D);
-  t22 = std::chrono::high_resolution_clock::now();
-  std::cout << "camera took "
-             << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
-             << " milliseconds\n";
-  cerr<<"Frontalization"<<endl;
-  t12 = std::chrono::high_resolution_clock::now();
-  Rect rect(0,0,images.size().width, images.size().height);
-  _align->frontalize(face_align , camera_model_3D , outFrontal);//, rect);
-  t22 = std::chrono::high_resolution_clock::now();
+  _faceRect.push_back(iamges.size());
+  std::vector<Mat> out_frontal;
+
+ (this->*alignment)(images,_faceRect,face_points,out_frontal);
+  outFrontal = out_frontal[0].clone();
   std::cout << "frontalize took "
              << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
              << " milliseconds\n";
@@ -190,8 +167,6 @@ FaceExtractor::alignment3D(
   {
     _align->frontalize(outFrontal[i],camera_model_3D[i],outFrontal[i]);
   }
-
-
 
 }
 
