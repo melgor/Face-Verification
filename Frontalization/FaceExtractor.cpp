@@ -1,8 +1,8 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-10 11:14:56
-* @Last Modified 2015-05-04
-* @Last Modified time: 2015-05-04 12:50:34
+* @Last Modified 2015-05-11
+* @Last Modified time: 2015-05-11 08:17:38
 */
 
 #include "FaceExtractor.hpp"
@@ -67,17 +67,14 @@ FaceExtractor::getFrontalFace(
 {
   //TODO: convert to new Flow +2D Transformation
   LOG(WARNING)<<"Face Detection";
-  auto t12 = std::chrono::high_resolution_clock::now();  
   FacePoints face_points,face_points_align;
   _faceatt->detectFacePoint(images,face_points);
-  _faceRect.push_back(iamges.size());
-  std::vector<Mat> out_frontal;
+  _faceRect.push_back(Rect(0,0,images.size().width,images.size().height));
+  vector<Mat> out_frontal;
+  vector<FacePoints> face_points_vec(1,face_points);
 
- (this->*alignment)(images,_faceRect,face_points,out_frontal);
+ (this->*alignment)(images,_faceRect,face_points_vec,out_frontal);
   outFrontal = out_frontal[0].clone();
-  std::cout << "frontalize took "
-             << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
-             << " milliseconds\n";
   cerr<<"End"<< endl;
 }
 
@@ -129,8 +126,8 @@ FaceExtractor::alignment2D(
       per_mat.at<float>(2,2) = 1.0f;
       perspectiveTransform(facesPoints[i], facesPoints[i], per_mat);
     }
-    // outFrontal[i] = face_align[i](face2d).clone();
-    outFrontal[i] = face_align[i].clone();
+    outFrontal[i] = face_align[i](_face2d).clone();
+    // outFrontal[i] = face_align[i].clone();
 
     #ifdef __DEBUG
     Mat cc = face_align[i].clone();  

@@ -1,7 +1,7 @@
 /*
 * @Author: melgor
 * @Date:   2014-05-26 22:22:02
-* @Last Modified 2015-05-04
+* @Last Modified 2015-05-11
 */
 #include <chrono>
 #include <iostream>
@@ -107,8 +107,7 @@ int main(int argc, char **argv)
     }
   }
   else if (conf.mode == "demo")
-  {
-    if 
+  { 
     FaceExtractor front(conf);
     FetureExtractor net_ext(conf);
     FaceDataBase face_data(conf);
