@@ -3,7 +3,7 @@
 //store information about learned People. 
 //For given representation it find closest people or say "Not Found"
 #include "Utils/Utils.hpp"
-#include "SVM.hpp"
+#include "Verificator.hpp"
 
 class FaceDataBase
 {
@@ -18,25 +18,14 @@ public:
 private:
   //compare if two features descrive same person or not
   float compare(cv::Mat& featureOne, cv::Mat& featureTwo);
-  //scale data
-  void scaleData(cv::Mat features, cv::Mat& scaledFeatures);
-  //distance function
-  void (*distanceFunction) (cv::Mat, cv::Mat, cv::Mat&) = NULL;
-
   struct Features*         _dataFeatures = NULL;
   std::vector<std::string> _labelsNames;
-  std::string              _unknown;
+  std::string              _unknown = "Unknown";
   //configuration
-  std::string      _metric;
-  std::string      _pathFaceData;
-  //data for scaling
-  cv::Mat          _maxValue;
-  std::string      _pathScaler;
+  std::string             _pathFaceData;
   //learning algorithm
-  SVMLinear*       _comparatorLinear = NULL;
-  std::string      _pathComparator;
-  std::string      _pathComparatorMat;
-  float            _threshold;
+  Verificator*            _verificator;
+  float                   _threshold;
 };
 
 #endif

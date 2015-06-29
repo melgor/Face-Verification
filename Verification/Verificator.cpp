@@ -1,10 +1,11 @@
 /*
 * @Author: melgor
 * @Date:   2015-04-09 09:05:37
-* @Last Modified 2015-04-10
-* @Last Modified time: 2015-04-10 12:52:02
+* @Last Modified 2015-06-24
+* @Last Modified time: 2015-06-24 09:26:44
 */
-
+#include <boost/algorithm/string.hpp>
+#include <algorithm>
 #include "Verificator.hpp"
 #include "Distances.hpp"
 #include "Utils/Serialization.hpp"
@@ -12,75 +13,84 @@
 using namespace std;
 using namespace cv;
 
+void readData( string& path, vector<string>& names, vector<int>& labels)
+{
+  string line;
+  ifstream myfile (path);
+  vector<string> splitteds;
+  while ( getline (myfile, line) )
+  {
+    boost::split(splitteds, line, boost::is_any_of(" "));
+    labels.push_back(std::stoi(splitteds[1]));
+    names.push_back(splitteds[0]);
+    splitteds.clear();
+   
+  }
+  myfile.close();
+}
+
 Verificator::Verificator(struct Configuration& config)
 {
-  _pathTrainFeatures  = config.trainData;
-  _pathValFeatures    = config.valData;
-  _threshold          = config.threshold;
-  _pathComparator     = config.pathComparator;
-  _pathComparatorMat  = config.pathComparatorMat;
-  _metric             = config.metric;
-  _pathScaler         = config.pathScaler;
+  _pathTrainFeatures = config.trainData;
+  _pathValFeatures   = config.valData;
+  _threshold         = config.threshold;
+  _metric            = config.metric;
+  _coeffPath         = config.coeffPath;
+  _biasPath          = config.biasPath;
+  _scalerMinPath     = config.scalerMinPath;
+  _scalerDiffPath    = config.scalerDiffPath;
+  _ver1Path          = config.ver1Label;
+  _ver2fPath         = config.ver2Label;
+  _valLabelPath      = config.valLabel;
   if (_metric == "Cosine")
     distanceFunction = &cosineDistance;
   else if(_metric == "Chi")
     distanceFunction = &chiSquaredDistance;
-  _comparatorLinear   = new SVMLinear(config);
+
+  loadModel();
+
 }
 
 void
-Verificator::train()
+Verificator::loadModel()
 {
-  //load train data
-  _trainFeatures      = new Features;
-  load( *_trainFeatures, _pathTrainFeatures);
-  cerr<<"Scale Data"<<endl;
-  learnScaleParam(_trainFeatures->data);
-  //scale all features
-  Mat scale_data_all;
-  for(int row = 0; row < _trainFeatures->data.rows; row++)
-  {
-    Mat scaled_data;
-    scaleData(_trainFeatures->data.row(row), scaled_data );
-    scale_data_all.push_back(scaled_data);
-  }
-  Mat features;
-  vector<int> labelsVec;
-  cerr<<"Create Verification Task"<<endl;
-  prepareVerificationData(scale_data_all, features,labelsVec);
-  cerr<<"Learn Model"<<endl;
-  _comparatorLinear->learn(features,labelsVec);
-  _comparatorLinear->saveModel(_pathComparator, _pathComparatorMat);
-  compress(_maxValue, _pathScaler);
+  load(_coeffSK, _coeffPath);
+  load(_biasSK, _biasPath);
+  load(_skalerMinSK, _scalerMinPath);
+  load(_skalerDiffSK, _scalerDiffPath);
 
-  cerr<<"Model Saved"<<endl;
+  cerr<<"Model Loaded"<<endl;
 }
 
-void 
-Verificator::verify()
-{
-  //load validation data
-  _trainFeatures      = new Features;
-  load( *_trainFeatures, _pathValFeatures);
-  load(_maxValue, _pathScaler);
-  _comparatorLinear->loadModel(_pathComparator, _pathComparatorMat);
-  //scale all features
-  Mat scale_data_all;
-  for(int row = 0; row < _trainFeatures->data.rows; row++)
-  {
-    Mat scaled_data;
-    scaleData(_trainFeatures->data.row(row), scaled_data );
-    scale_data_all.push_back(scaled_data);
-  }
-  // Mat f1 = scale_data_all.row(0), f2 = scale_data_all.row(0);
-  // cerr<<"Compare: "<<compare(f1,f2) << endl;
-  Mat features;
-  vector<int> labelsVec;
-  cerr<<"Create Verification Task"<<endl;
-  prepareVerificationData(scale_data_all, features,labelsVec);
-  _comparatorLinear->loadData(features,labelsVec);
-  _comparatorLinear->evalModel();
 
+float 
+Verificator::predictFull(
+                       Mat featureOne
+                     , Mat featureTwo
+                    )
+{
+  Mat scaled_data_1, scaled_data_2;
+  scaleData(featureOne, scaled_data_1 );
+  scaleData(featureTwo, scaled_data_2 );
+  
+  Mat feat;
+  (*distanceFunction)(scaled_data_1,scaled_data_2,feat);
+  //apply learned coefficient
+  float prob_class = _coeffSK.dot(feat) + _biasSK.at<double>(0,0);
+  return prob_class;
+}
+
+float 
+Verificator::predict(
+                       Mat featureOne
+                     , Mat featureTwo
+                    )
+{
+   Mat feat;
+  (*distanceFunction)(featureOne,featureTwo,feat);
+  //apply learned coefficient
+  float prob_class = _coeffSK.dot(feat) + _biasSK.at<double>(0,0);
+  return prob_class;
 }
 
 //compare if two features descrive same person or not
@@ -90,103 +100,101 @@ Verificator::compare(
                     , Mat& featureTwo
                     )
 {
-  //compute feature representation
-  Mat feat;
-  (*distanceFunction)(featureOne,featureTwo,feat);
-  
   //predict value or apply threshold
-  return _comparatorLinear->predict_class(feat);
+  float score = predict(featureOne, featureTwo);
+  if (score > _threshold)
+    return 1;
+  return 0;
 }
 
 //scale data
 void 
 Verificator::scaleData(
-                        Mat features
+                        Mat  features
                       , Mat& scaledFeatures
                       )
 {
-  scaledFeatures =  features.mul(1.0/(_maxValue));
+  scaledFeatures =  ((features - _skalerMinSK).mul(1.0/_skalerDiffSK));
 }
 
 void 
-Verificator::prepareVerificationData(
-                              Mat& scaledFetures
-                            , Mat& featuresVer
-                            , vector<int>& labelsVecVer
-                            )
-{
-  int num_example =  _trainFeatures->labels.size();
-  labelsVecVer.resize(2 * num_example,0);
-  RNG rng;
-  int feat_1 = 0, feat_2 = 0;
-  //produce only positive example
-  for(int i = 0; i < 1.0* num_example; i++)
-  {
-    feat_1 = 0;
-    feat_2 = 10;
-    //cerr<<i<<" "<<(feat_1 == feat_2) << " "<< !feat_1<<endl;
-    while(_trainFeatures->labels[feat_2] != _trainFeatures->labels[feat_1])
-    {
-      //get two random example and create vector for feature based on distance
-      feat_1 = rng.uniform(int(0), num_example -1);
-      feat_2 = rng.uniform(int(0), num_example -1);
-       //cerr<<i<<" "<<(feat_1 == feat_2) << " "<< !feat_1<<endl;
-    }
-
-    // cerr<<"Labels: "<<_trainFeatures->labels[feat_1] <<" "<< _trainFeatures->labels[feat_2]<<" "  << feat_1 << "  "<<feat_2<<" names: "<<_trainFeatures->names[feat_1]<<" "<<_trainFeatures->names[feat_2] << endl;
-    Mat feat;
-    (*distanceFunction)(scaledFetures.row(feat_1),scaledFetures.row(feat_2),feat);
-    featuresVer.push_back(feat);
-    // if (_trainFeatures->labels[feat_1] == _trainFeatures->labels[feat_2])
-    labelsVecVer[i] = 1;
-  }
-
-  //produce only negative example
-  for(int i = 1.0* num_example; i < 2*num_example; i++)
-  {
-    feat_1 = 0;
-    feat_2 = 0;
-    while(_trainFeatures->labels[feat_2] == _trainFeatures->labels[feat_1])
-    {
-      //get two random example and create vector for Chi distance
-      feat_1 = rng.uniform(int(0), num_example -1);
-      feat_2 = rng.uniform(int(0), num_example -1);
-    }
-
-    Mat feat;
-    (*distanceFunction)(scaledFetures.row(feat_1),scaledFetures.row(feat_2),feat);
-    featuresVer.push_back(feat);
-
-  }
+Verificator::verify()
+{ 
+  readVerificationData();
+  evalVerification();
 }
 
-//learn scale value from train data
-void
-Verificator::learnScaleParam(Mat& features)
+void 
+Verificator::evalVerification()
 {
-  //find max value of each feature value
-  _maxValue = Mat::zeros(Size(features.size().width,1),features.type());
-  double min, max;
-  for(int col = 0; col < features.cols; col++)
+  
+  Features* train_Features      = new Features;
+  load( *train_Features, _pathValFeatures);
+  //scale all features
+  Mat scaled_features;
+  for(int row = 0; row < train_Features->data.rows; row++)
   {
-    //get row of features from column
-    Mat feat_col = features.col(col);
-    // cerr<<"Size: "<< feat_col.size()  <<" Type: "<<feat_col.type() <<" "<<  col<< endl;
-    minMaxLoc(feat_col, &min, &max);
-     // cerr<<"min: "<< min  <<" max: "<<max <<" "<<  col<< endl;
-    //TODO: set one type of Mat
-    if(float(max) != 0.0f)
-      _maxValue.at<float>(0,col) = float(max);
+    Mat scaled_data;
+    scaleData(train_Features->data.row(row), scaled_data );
+    scaled_features.push_back(scaled_data);
+  }
+
+  int good = 0;
+  for(uint i = 0; i < _idxVer1.size(); i++)
+  {
+    float score = predict(scaled_features.row(_idxVer1[i]), scaled_features.row(_idxVer2[i]));
+    int label = 0;
+    if(score > _threshold)
+      label = 1;
+    
+    if( label == _idxLabels[i])
+      good++;
+
+  }
+  
+  cerr<<"ACC: "<< (float(good)/_idxVer1.size()) << endl;
+  delete train_Features;
+}
+
+void 
+Verificator::readVerificationData()
+{
+  vector<string> names_ver_1, names_ver_2, names_val;
+  vector<int>    labels_ver_1, labels_ver_2, labels_val;
+  
+  readData(_ver1Path, names_ver_1, labels_ver_1);
+  readData(_ver2fPath, names_ver_2, labels_ver_2);
+  readData(_valLabelPath, names_val, labels_val);
+  cerr<<"Sizes: "<< labels_ver_1.size() << " "<< labels_ver_2.size() <<" " << labels_val.size() << endl;
+  
+  //find index of images from feature vector
+  _idxVer1.reserve( names_ver_1.size());
+  _idxVer2.reserve( names_ver_1.size());
+  for(uint i = 0; i < names_ver_1.size(); i++)
+  {
+    string ver_1 = names_ver_1[i];
+    string ver_2 = names_ver_2[i];
+    int idx_ver_1 = std::distance(names_val.begin(), std::find(names_val.begin(), names_val.end(), ver_1));
+    int idx_ver_2 = std::distance(names_val.begin(), std::find(names_val.begin(), names_val.end(), ver_2));
+    _idxVer1.push_back(idx_ver_1);
+    _idxVer2.push_back(idx_ver_2);
+    if( labels_ver_1[i] == labels_ver_2[i])
+    {
+      _idxLabels.push_back(1);
+    }
     else
-      _maxValue.at<float>(0,col) = 1.0f;
+    {
+      _idxLabels.push_back(0);
+    }
+    if (i%1000  == 0)
+      cerr<<"Set " << i << endl;
   }
-  cerr<<"Scale Mat: "<< _maxValue << endl;
 }
+
+
 
 Verificator::~Verificator()
 {
-
-  delete _comparatorLinear;
   if (_trainFeatures != NULL)
       delete _trainFeatures;
 

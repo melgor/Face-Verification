@@ -34,6 +34,7 @@ private:
   dlib::shape_predictor       _poseModel;
   float                       _padValue;
   float                       _resizeImageRatio;
+  int                         _numNotDetected = 0;
 
 };
 

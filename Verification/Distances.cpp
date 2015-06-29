@@ -38,7 +38,7 @@ cosineDistance(cv::Mat feat1, cv::Mat feat2, cv::Mat& result)
   float sum_vec1    = sum(feat1.mul(feat1))[0];
   float sum_vec2    = sum(feat2.mul(feat2))[0];
 
-  float result_val  =  dot_prodcut/sqrt(sum_vec1 * sum_vec2);
+  float result_val  =  dot_prodcut/(sqrt(sum_vec1) * sqrt(sum_vec2));
   std::vector<float> data(1,result_val);
   result            =  Mat( data, true);
 }

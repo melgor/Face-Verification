@@ -49,13 +49,18 @@ struct Configuration
   std::string  trainData;
   std::string  valData;
   std::string  metric;
-  std::string  pathComparator;
-  std::string  pathComparatorMat;
-  std::string  pathScaler;
   std::string  faceData;
   std::string  faceLabels;
   float        threshold;
   bool         scaleFeature;
+  std::string  valLabel;
+  std::string  ver1Label;
+  std::string  ver2Label;
+  //Verification-Sklearn model
+  std::string  coeffPath;
+  std::string  biasPath;
+  std::string  scalerMinPath;
+  std::string  scalerDiffPath;
   //daemon
   std::string watchFolder; 
   std::string pathLog;
@@ -100,13 +105,18 @@ struct Configuration
     trainData          = mainFolder + pt.get<std::string>("Verification.TrainData");
     valData            = mainFolder + pt.get<std::string>("Verification.ValData");
     metric             = pt.get<std::string>("Verification.Metric");
-    pathComparator     = mainFolder + pt.get<std::string>("Verification.ComparatorPath");
-    pathComparatorMat  = mainFolder + pt.get<std::string>("Verification.ComparatorPathMat");
     threshold          = pt.get<float>("Verification.Thres");
-    pathScaler         = mainFolder + pt.get<std::string>("Verification.ScalerPath");
     scaleFeature       = pt.get<bool>("Verification.ScaleFeature");
     faceData           = mainFolder + pt.get<std::string>("Verification.FaceData");
     faceLabels         = mainFolder + pt.get<std::string>("Verification.FaceLabels");
+    valLabel           = mainFolder + pt.get<std::string>("TestModel.val_path");
+    ver1Label          = mainFolder + pt.get<std::string>("TestModel.val_ver1");
+    ver2Label          = mainFolder + pt.get<std::string>("TestModel.val_ver2");
+    //Verification-Sklearn model
+    coeffPath          = mainFolder + pt.get<std::string>("Verification.CoeffPath");
+    biasPath           = mainFolder + pt.get<std::string>("Verification.BiasPath");
+    scalerMinPath      = mainFolder + pt.get<std::string>("Verification.ScalerMinPath");
+    scalerDiffPath     = mainFolder + pt.get<std::string>("Verification.ScalerDiffPath");
     //Daemon
     watchFolder        = mainFolder + pt.get<std::string>("Daemon.WatchFolder");
     pathLog            = mainFolder + pt.get<std::string>("Daemon.LogFolder");
@@ -146,9 +156,6 @@ struct Configuration
     LOG(WARNING) <<"Metric:            "<<metric;
     LOG(WARNING) <<"Thres:             "<<threshold;
     LOG(WARNING) <<"ScaleFeature:      "<<scaleFeature;
-    LOG(WARNING) <<"ComparatorPath:    "<<pathComparator;
-    LOG(WARNING) <<"ComparatorPathMat: "<<pathComparatorMat;
-    LOG(WARNING) <<"ScalerPath:        "<<pathScaler;
     LOG(WARNING) <<"-------------Daemon---------";
     LOG(WARNING) <<"WatchFolder:     "<<watchFolder;
     LOG(WARNING) <<"LogFolder:       "<<pathLog;
