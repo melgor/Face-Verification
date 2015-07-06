@@ -1,7 +1,7 @@
 /* 
 * @Author: melgor
 * @Date:   2014-06-02 18:46:20
-* @Last Modified 2015-03-03
+* @Last Modified 2015-06-24
 */
 
 #include "Parser.hpp"
@@ -29,18 +29,18 @@ Parser::read(int argc, char** argv)
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
   po::notify(vm);
-  if(help || argc < 4)
+  if(help || argc < 2)
   {
     printHelp();
     exit(0);
   }
 
-  if(scene == "" && folderpath == "")
-  {
-     std::cout<<"No scene set. Set it using below help"<<std::endl;
-     printHelp();
-     exit(0);
-  }
+  // if(scene == "" && folderpath == "")
+  // {
+  //    std::cout<<"No scene set. Set it using below help"<<std::endl;
+  //    printHelp();
+  //    exit(0);
+  // }
 
 }
 

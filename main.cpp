@@ -1,7 +1,7 @@
 /*
 * @Author: melgor
 * @Date:   2014-05-26 22:22:02
-* @Last Modified 2015-05-11
+* @Last Modified 2015-06-25
 */
 #include <chrono>
 #include <iostream>
@@ -12,6 +12,7 @@
 #include "Verification/Verificator.hpp"
 #include "Verification/FaceDataBase.hpp"
 #include "Utils/Daemon.hpp"
+#include "Utils/ServerTCP.hpp"
 
 using namespace std;
 int main(int argc, char **argv)
@@ -36,7 +37,7 @@ int main(int argc, char **argv)
   else if(conf.mode == "train")
   {
     Verificator verificator(conf);
-    verificator.train();
+    // verificator.train();
 
   }
   else if(conf.mode == "detect")
@@ -56,7 +57,7 @@ int main(int argc, char **argv)
           fs::recursive_directory_iterator itr(p);
           while (itr != boost::filesystem::recursive_directory_iterator())
           {
-          std::string extension = itr->path().extension().string();
+            std::string extension = itr->path().extension().string();
             if(extension == ".png" || extension == ".jpg" || extension == ".jpeg")
             {
               path.push_back(itr->path().string());
@@ -67,9 +68,9 @@ int main(int argc, char **argv)
               std::vector<cv::Mat>  outs;
               front.getFrontalFace(image,outs);
               if (outs[0].size().width != 0)
-                cv::imwrite(out_path,outs[0]);
+                cv::imwrite(out_path, outs[0]);
               else
-                cv::imwrite(out_path,image);
+                cv::imwrite(out_path, image);
             }
             ++itr;
           }
@@ -101,7 +102,7 @@ int main(int argc, char **argv)
       int i = 0;
       for(auto& img : outFrontal)
       {
-        cv::imwrite(std::to_string(i) +  conf.nameScene,img);
+        cv::imwrite(std::to_string(i) +  conf.nameScene, img);
         i++;
       }
     }
@@ -122,8 +123,9 @@ int main(int argc, char **argv)
       #ifdef __MSTIME
       auto t12 = std::chrono::high_resolution_clock::now();
       #endif
-      front.getFrontalFace(image,outFrontal);
+      front.getFrontalFace(image, outFrontal);
       int num_face = 0;
+    
       for(auto& face : outFrontal)
       {
         //extract feature
@@ -131,7 +133,7 @@ int main(int argc, char **argv)
         #ifdef __MSTIME
         auto t12Ef = std::chrono::high_resolution_clock::now();
         #endif
-        net_ext.extractFeature(face,features);
+        net_ext.extractFeature(face, features);
         #ifdef __MSTIME
         auto t22Ef = std::chrono::high_resolution_clock::now();
         std::cout << "Feature Extraction took "
@@ -153,8 +155,8 @@ int main(int argc, char **argv)
               << std::chrono::duration_cast<std::chrono::milliseconds>(t22 - t12).count()
               << " milliseconds\n";
       #endif
-      cv::namedWindow("Demo",CV_WINDOW_AUTOSIZE );
-      cv::imshow("Demo",image);
+      cv::namedWindow("Demo", CV_WINDOW_AUTOSIZE );
+      cv::imshow("Demo", image);
       cv::waitKey();
     }
     // cv::namedWindow("frontalize",CV_WINDOW_NORMAL);
@@ -165,6 +167,27 @@ int main(int argc, char **argv)
   {
     Daemon daemon(conf);
     daemon.run();
+  }
+  else if (conf.mode == "server")
+  {
+    ServerTCP_Face server(conf);
+    server.run();
+  }
+  else if( conf.mode == "compare_image")
+  { //Take to faces from disk (after face detection and alignment) and return score of similarity
+    FetureExtractor net_ext(conf);
+    Verificator verificator(conf);
+    std::vector<std::string> splitteds;
+    boost::split(splitteds, conf.nameScene, boost::is_any_of(","));
+    cv::Mat image_1 = cv::imread(splitteds[0]);
+    cv::Mat image_2 = cv::imread(splitteds[1]);
+    //extract features
+    cv::Mat features_1, features_2;
+    net_ext.extractFeature(image_1, features_1);
+    net_ext.extractFeature(image_2, features_2);
+    float score = verificator.predictFull(features_1, features_2);
+    cerr<<"Score: "<< score << endl;
+      
   }
   else if (conf.mode == "create_model")
   {

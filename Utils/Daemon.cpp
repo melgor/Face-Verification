@@ -16,7 +16,6 @@
 #include <syslog.h>
 #include <glog/logging.h>
 #include <boost/algorithm/string.hpp>
-#include <errno.h>
 #include <fstream>
 #include "inotify-cxx/inotify-cxx.h"
 #include "Daemon.hpp"

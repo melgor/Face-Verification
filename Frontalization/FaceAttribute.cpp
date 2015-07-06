@@ -1,8 +1,8 @@
 /* 
 * @Author: melgor
 * @Date:   2015-02-09 10:07:08
-* @Last Modified 2015-05-04
-* @Last Modified time: 2015-05-04 11:41:22
+* @Last Modified 2015-05-14
+* @Last Modified time: 2015-05-14 20:00:44
 */
 #include "FaceAttribute.hpp"
 #include <dlib/opencv.h>
@@ -63,6 +63,7 @@ FaceAttribute::detectFaceAndPoint(
   if (!detected_faces.size())
   {
     DLOG(WARNING) <<"No Face Detected";
+    _numNotDetected++;
     // return;
     dlib::rectangle rect(img.size().width,img.size().height);
     detected_faces.push_back(rect);
@@ -169,11 +170,11 @@ FaceAttribute::getBoundingRect(
      right_bottom = Point(faceRect.right() + width_pad, faceRect.bottom() + height_pad );
      // cerr<<"W: "<< width_pad <<"   "<< imageRect <<"  "<< left_top << "    "<< right_bottom <<endl; 
   }
-  DLOG(WARNING) <<"W: "<< width_pad <<"   "<< imageRect <<"  "<< left_top << "    "<< right_bottom; 
+  // DLOG(WARNING) <<"W: "<< width_pad <<"   "<< imageRect <<"  "<< left_top << "    "<< right_bottom; 
   outRect = Rect(left_top,right_bottom);
 }
 
 FaceAttribute::~FaceAttribute()
 {
-
+  DLOG(WARNING) <<"Not Face Detected: "<<_numNotDetected;
 }

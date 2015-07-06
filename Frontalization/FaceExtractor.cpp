@@ -1,8 +1,8 @@
 /* 
 * @Author: blcv
 * @Date:   2015-03-10 11:14:56
-* @Last Modified 2015-05-11
-* @Last Modified time: 2015-05-11 08:17:38
+* @Last Modified 2015-05-14
+* @Last Modified time: 2015-05-14 19:58:46
 */
 
 #include "FaceExtractor.hpp"
@@ -80,11 +80,11 @@ FaceExtractor::getFrontalFace(
 
 void 
 FaceExtractor::alignment2D( 
-                  Mat& image
-                , vector<Rect>& faceRectangle 
-                , vector<FacePoints>& facesPoints
-                , vector<Mat>& outFrontal
-                )
+                            Mat& image
+                          , vector<Rect>& faceRectangle 
+                          , vector<FacePoints>& facesPoints
+                          , vector<Mat>& outFrontal
+                          )
 {
   LOG(WARNING)<<"Alignment 2D";
  
@@ -126,8 +126,8 @@ FaceExtractor::alignment2D(
       per_mat.at<float>(2,2) = 1.0f;
       perspectiveTransform(facesPoints[i], facesPoints[i], per_mat);
     }
-    outFrontal[i] = face_align[i](_face2d).clone();
-    // outFrontal[i] = face_align[i].clone();
+    // outFrontal[i] = face_align[i](_face2d).clone();
+    outFrontal[i] = face_align[i].clone();
 
     #ifdef __DEBUG
     Mat cc = face_align[i].clone();  
@@ -148,11 +148,11 @@ FaceExtractor::alignment2D(
 
 void 
 FaceExtractor::alignment3D( 
-                  Mat& image
-                , vector<Rect>& faceRectangle 
-                , vector<FacePoints>& facesPoints
-                , vector<Mat>& outFrontal
-                )
+                              Mat& image
+                            , vector<Rect>& faceRectangle 
+                            , vector<FacePoints>& facesPoints
+                            , vector<Mat>& outFrontal
+                          )
 {
   alignment2D(image,faceRectangle,facesPoints,outFrontal);
   LOG(WARNING)<<"Alignment 3D";
@@ -169,8 +169,8 @@ FaceExtractor::alignment3D(
 
 FaceExtractor::~FaceExtractor()
 {
- delete _faceatt;
- delete _camera;
- delete _align;
- delete _affine;
+  delete _faceatt;
+  delete _camera;
+  delete _align;
+  delete _affine;
 }

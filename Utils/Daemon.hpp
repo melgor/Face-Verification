@@ -1,3 +1,6 @@
+#ifndef DAEMON_HPP
+#define DAEMON_HPP
+
 #include <memory>
 #include "Utils.hpp"
 #include "Frontalization/FaceExtractor.hpp"
@@ -28,3 +31,5 @@ private:
   std::shared_ptr<FetureExtractor> _netExt;
   std::shared_ptr<FaceDataBase>    _faceData;
 };
+
+#endif //DAEMON_HPP
