@@ -45,6 +45,7 @@ private:
   int             _portNumber;
   std::string     _ipServer;
   bool            _stop = false;
+  boost::asio::io_service _io_service;
   //models
   std::shared_ptr<FaceExtractor>   _faceExt;
   std::shared_ptr<FetureExtractor> _netExt;

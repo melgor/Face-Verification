@@ -2,6 +2,7 @@
 #include <sstream>
 #include <thread>
 #include <boost/algorithm/string.hpp>
+#include <boost/array.hpp>
 
 using boost::asio::ip::tcp;
 const int max_length = 1024;
@@ -9,61 +10,68 @@ using namespace std;
 
 void 
 session(  
-          tcp::socket sock
+          tcp::socket& sock
         , ServerTCP_Face* server
        )
 {
   try
   {
-    for (;;)
-    {
-      char data[max_length];
-
+    //for (;;)
+    //{
+      // char data[max_length];
+      boost::array<char,max_length> buf;
       boost::system::error_code error;
-      size_t length = sock.read_some(boost::asio::buffer(data), error);
+      size_t length = sock.read_some(boost::asio::buffer(buf), error);
       if (error == boost::asio::error::eof)
-        break; // Connection closed cleanly by peer.
+        // break; // Connection closed cleanly by peer.
+        return;
       else if (error)
         throw boost::system::system_error(error); // Some other error.
       //Choose method, which should be proccessed
-      string message = std::string(data);
+      string message = std::string(buf.data(), length);
       vector<string> splitted_message;
       boost::split(splitted_message, message, boost::is_any_of(" "));
+      // cerr<<"Splited message"<<endl;
+      // for(auto& elem : splitted_message)
+      //   cerr<<elem <<" ";
+      // cerr<<endl;
       if(splitted_message[0] == server->_classifyProtocol) 
       {
         //Download image
         cv::Mat image;
-        bool error_down = loadImage(std::string(data), image); 
+        bool error_down = loadImage(splitted_message[1], image); 
         if (error_down)
         {
           server->runFaceVerification(image);
           std::ostringstream oss;
           oss << image.size();
           std::string s = oss.str();
-          boost::asio::write(sock, boost::asio::buffer( s.c_str(), length));
+          boost::asio::write(sock, boost::asio::buffer( s.c_str(), s.length()));
         }
         else
         {
-          std::string error_link = server->_errorDownload + std::string(data);
-          boost::asio::write(sock, boost::asio::buffer( error_link.c_str(), length));
+          std::string error_link = server->_errorDownload + splitted_message[1];
+          boost::asio::write(sock, boost::asio::buffer( error_link.c_str(), error_link.length()));
         }
       }
       else if(splitted_message[0] == server->_statusProtocol) 
       {
         std::string s = server->returnStatus();
-        boost::asio::write(sock, boost::asio::buffer( s.c_str(), length));
+        boost::asio::write(sock, boost::asio::buffer( s.c_str(), s.length()));
       }
       else if(splitted_message[0] == server->_stopProtocol) 
       {
-        boost::asio::write(sock, boost::asio::buffer(server->_stopMessage.c_str(), length));
+        boost::asio::write(sock, boost::asio::buffer(server->_stopMessage.c_str(), server->_stopMessage.length()));
         server->stopServer();
+        sock.close();
+        // break;
       }
       else //command not found
       {
-        boost::asio::write(sock, boost::asio::buffer(server->_notFound.c_str(), length));
+        boost::asio::write(sock, boost::asio::buffer(server->_notFound.c_str(), server->_notFound.length()));
       }
       
-    }
+    //}
   }
   catch (std::exception& e)
   {
@@ -84,9 +92,9 @@ ServerTCP_Face::ServerTCP_Face(Configuration& config)
   LOG(WARNING)<<"Resize: "<< _config.resizeImageRatio <<" Port Number: "<< _portNumber;
   try {
     LOG(WARNING)<<"Create Models";
-    _faceExt   = std::make_shared<FaceExtractor>(_config);
-    _netExt    = std::make_shared<FetureExtractor>(_config);
-    _faceData  = std::make_shared<FaceDataBase>(_config);
+    // _faceExt   = std::make_shared<FaceExtractor>(_config);
+    // _netExt    = std::make_shared<FetureExtractor>(_config);
+    // _faceData  = std::make_shared<FaceDataBase>(_config);
     LOG(WARNING)<<"Models Created";
   } catch (std::exception &e) {
       LOG(ERROR) << "Exception occured: " << e.what();
@@ -98,21 +106,23 @@ ServerTCP_Face::ServerTCP_Face(Configuration& config)
 void
 ServerTCP_Face::run()
 { 
-  boost::asio::io_service io_service;
+  
   //tcp::v4()
-  tcp::acceptor a(io_service, tcp::endpoint(boost::asio::ip::address::from_string(_ipServer), _portNumber));
+  tcp::acceptor a(_io_service, tcp::endpoint(boost::asio::ip::address::from_string(_ipServer), _portNumber));
   cerr << a.local_endpoint().address().to_string() << " port " << _portNumber << endl;
   while(!_stop)
   {
-    tcp::socket sock(io_service);
+    tcp::socket sock(_io_service);
     a.accept(sock);
-    std::thread(session, std::move(sock), this).detach();
+    // std::thread(session, std::move(sock), this).detach(); //this is used for asynchronus connection, problem with stoping all sockets
+    session(sock,this);
   }
 }
 void 
 ServerTCP_Face::stopServer()
 {
   _stop = true;  
+  _io_service.stop();
 }
 
 void 
