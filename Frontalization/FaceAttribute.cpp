@@ -64,9 +64,9 @@ FaceAttribute::detectFaceAndPoint(
   {
     DLOG(WARNING) <<"No Face Detected";
     _numNotDetected++;
-    // return;
-    dlib::rectangle rect(img.size().width,img.size().height);
-    detected_faces.push_back(rect);
+    return;
+    // dlib::rectangle rect(img.size().width,img.size().height);
+    // detected_faces.push_back(rect);
   }
   else
   {

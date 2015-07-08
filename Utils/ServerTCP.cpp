@@ -108,16 +108,26 @@ ServerTCP_Face::run()
 { 
   
   //tcp::v4()
-  tcp::acceptor a(_io_service, tcp::endpoint(boost::asio::ip::address::from_string(_ipServer), _portNumber));
-  std::cerr << "Server Started: "<< a.local_endpoint().address().to_string() << " port " << _portNumber << std::endl;
-  LOG(WARNING) << "Server Started: "<< a.local_endpoint().address().to_string() << " port " << _portNumber;
-  while(!_stop)
+  try
   {
-    tcp::socket sock(_io_service);
-    a.accept(sock);
-    // std::thread(session, std::move(sock), this).detach(); //this is used for asynchronus connection, problem with stoping all sockets
-    session(sock,this);
+    tcp::acceptor a(_io_service, tcp::endpoint(boost::asio::ip::address::from_string(_ipServer), _portNumber));
+    std::cerr << "Server Started: "<< a.local_endpoint().address().to_string() << " port " << _portNumber << std::endl;
+    LOG(WARNING) << "Server Started: "<< a.local_endpoint().address().to_string() << " port " << _portNumber;
+    while(!_stop)
+    {
+      tcp::socket sock(_io_service);
+      a.accept(sock);
+      // std::thread(session, std::move(sock), this).detach(); //this is used for asynchronus connection, problem with stoping all sockets
+      session(sock,this);
+    }
   }
+  catch (std::exception& e)
+  {
+     LOG(ERROR) << "Exception while creating server: " << e.what();
+     return;
+  }
+
+ 
 }
 void 
 ServerTCP_Face::stopServer()
@@ -141,12 +151,13 @@ ServerTCP_Face::runFaceVerification(cv::Mat& image)
   LOG(WARNING) <<" Size: "<< image.size();
   //get frontal face
   std::vector<cv::Mat> outFrontals;
-  _faceExt->getFrontalFace(image,outFrontals);
-  int num_face = 0;
+  _faceExt->getFrontalFace(image, outFrontals);
+  
   std::string name_label;
   float       score_label;
   int         id;
   std::ostringstream osstream_result;
+  int num_face = 0;
   for(auto& face : outFrontals)
   {
     //extract feature
@@ -156,10 +167,11 @@ ServerTCP_Face::runFaceVerification(cv::Mat& image)
     _faceData->returnClosestIDNameScore(features, id, name_label, score_label);
     cv::Rect pt = _faceExt->_faceRect[num_face];
     osstream_result << "Label: "<< name_label <<" score: " << score_label << " x: " << pt.tl().x << " y: "<< pt.tl().y<< " w: " << pt.width<< " h: " << pt.height<< std::endl;
-  
-    //save result to file
     num_face++;
   }
+  if(num_face == 0)
+    osstream_result << "No Face Detected" << std::endl;
+
   return osstream_result.str();
 }
 

@@ -40,15 +40,15 @@ FaceExtractor::getFrontalFace(
   #endif
   _faceRect.clear();
   vector<FacePoints> face_points, face_points_align;
-  _faceatt->detectFaceAndPoint(image,face_points, _faceRect);
+  _faceatt->detectFaceAndPoint(image, face_points, _faceRect);
 
   if(!face_points.size())
   {
     LOG(WARNING)<<"Exit, no Face";
-    outFrontal.push_back(Mat::zeros(100,100,CV_8UC3));
+    // outFrontal.push_back(Mat::zeros(100,100,CV_8UC3));
     return;
   }  
-  (this->*alignment)(image,_faceRect,face_points,outFrontal);
+  (this->*alignment)(image, _faceRect, face_points, outFrontal);
 
   #ifdef __MSTIME
   auto t22 = std::chrono::high_resolution_clock::now();
@@ -61,8 +61,8 @@ FaceExtractor::getFrontalFace(
 
 void 
 FaceExtractor::getFrontalFace(
-                               Mat& images
-                              ,Mat& outFrontal
+                                Mat& images
+                              , Mat& outFrontal
                               )
 {
   //TODO: convert to new Flow +2D Transformation
