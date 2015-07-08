@@ -56,14 +56,16 @@ FaceDataBase::returnClosestID(Mat& feature)
 {
   string name;
   float score;
-  returnClosestIDNameScore(feature, name, score);
+  int id;
+  returnClosestIDNameScore(feature, id, name, score);
 
-  return score;
+  return id;
 }
 
 void 
 FaceDataBase::returnClosestIDNameScore( 
                                         Mat& feature
+                                      , int& id
                                       , string& name
                                       , float& score
                                       )
@@ -78,10 +80,6 @@ FaceDataBase::returnClosestIDNameScore(
   {
     float prob_value =_verificator->predict(scaled_feature, _dataFeatures->data.row(row));
     result_prob.push_back(make_pair(prob_value, _dataFeatures->labels[row]));
-//     if(prob_value > 0.0)
-//       cerr<<"Prob: "<< prob_value <<" Label: "<< _dataFeatures->labels[row] << endl;
-    if( row == 1208)
-      cerr<<"Prob: "<< prob_value <<" Label: "<< _dataFeatures->labels[row] << endl;
   }
 
   auto result = std::max_element(result_prob.begin(), result_prob.end()
@@ -99,13 +97,15 @@ FaceDataBase::returnClosestIDNameScore(
   LOG(WARNING)<<"Max prob: "<< (*result).first << " label: "<< (*result).second << " name:  "<< _labelsNames[(*result).second];
   if ((*result).first > _threshold)
   {
-    score = (*result).second;
-    name = _labelsNames[(*result).second];
+    score = (*result).first;
+    name  = _labelsNames[(*result).second];
+    id    = (*result).second;
   }
   else
   {
     score = -1;
     name  = _unknown;
+    id    = -1;
   }
 
  

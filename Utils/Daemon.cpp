@@ -177,6 +177,7 @@ Daemon::runFaceVerification(string path)
   int num_face = 0;
   std::string name_label;
   float       score_label;
+  int         id;
 
   for(auto& face : outFrontal)
   {
@@ -184,7 +185,7 @@ Daemon::runFaceVerification(string path)
     cv::Mat features;
     _netExt->extractFeature(face,features);          
     //classify image
-    _faceData->returnClosestIDNameScore(features,name_label,score_label);
+    _faceData->returnClosestIDNameScore(features, id, name_label, score_label);
     LOG(WARNING)<< "Face: "<< score_label <<" Label "<< name_label;
     cv::Rect pt = _faceExt->_faceRect[num_face];
     file_result << "Label: "<< name_label <<" score: " << score_label << " x: " << pt.tl().x << " y: "<< pt.tl().y<< " w: " << pt.width<< " h: " << pt.height<< std::endl;

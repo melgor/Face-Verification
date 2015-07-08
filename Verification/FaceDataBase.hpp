@@ -12,7 +12,7 @@ public:
   FaceDataBase(struct Configuration& config);
   int         returnClosestID(cv::Mat& feature);
   std::string returnClosestIDName(cv::Mat& feature);
-  void returnClosestIDNameScore(cv::Mat& feature, std::string& name, float& score);
+  void returnClosestIDNameScore(cv::Mat& feature, int& id, std::string& name, float& score);
   ~FaceDataBase();
 
 private:

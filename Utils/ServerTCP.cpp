@@ -42,9 +42,10 @@ session(
         bool error_down = loadImage(splitted_message[1], image); 
         if (error_down)
         {
-          server->runFaceVerification(image);
+          std::string result = server->runFaceVerification(image);
           std::ostringstream oss;
-          oss << image.size();
+          // oss << image.size();
+          oss << result;
           std::string s = oss.str();
           boost::asio::write(sock, boost::asio::buffer( s.c_str(), s.length()));
         }
@@ -75,7 +76,7 @@ session(
   }
   catch (std::exception& e)
   {
-    std::cerr << "Exception in thread: " << e.what() << "\n";
+     LOG(ERROR) << "Exception in thread: " << e.what();
   }
 }
 
@@ -89,12 +90,11 @@ ServerTCP_Face::ServerTCP_Face(Configuration& config)
 
   _config.print();
   initLoggig();
-  LOG(WARNING)<<"Resize: "<< _config.resizeImageRatio <<" Port Number: "<< _portNumber;
   try {
     LOG(WARNING)<<"Create Models";
-    // _faceExt   = std::make_shared<FaceExtractor>(_config);
-    // _netExt    = std::make_shared<FetureExtractor>(_config);
-    // _faceData  = std::make_shared<FaceDataBase>(_config);
+    _faceExt   = std::make_shared<FaceExtractor>(_config);
+    _netExt    = std::make_shared<FetureExtractor>(_config);
+    _faceData  = std::make_shared<FaceDataBase>(_config);
     LOG(WARNING)<<"Models Created";
   } catch (std::exception &e) {
       LOG(ERROR) << "Exception occured: " << e.what();
@@ -109,7 +109,8 @@ ServerTCP_Face::run()
   
   //tcp::v4()
   tcp::acceptor a(_io_service, tcp::endpoint(boost::asio::ip::address::from_string(_ipServer), _portNumber));
-  cerr << a.local_endpoint().address().to_string() << " port " << _portNumber << endl;
+  std::cerr << "Server Started: "<< a.local_endpoint().address().to_string() << " port " << _portNumber << std::endl;
+  LOG(WARNING) << "Server Started: "<< a.local_endpoint().address().to_string() << " port " << _portNumber;
   while(!_stop)
   {
     tcp::socket sock(_io_service);
@@ -144,6 +145,7 @@ ServerTCP_Face::runFaceVerification(cv::Mat& image)
   int num_face = 0;
   std::string name_label;
   float       score_label;
+  int         id;
   std::ostringstream osstream_result;
   for(auto& face : outFrontals)
   {
@@ -151,8 +153,7 @@ ServerTCP_Face::runFaceVerification(cv::Mat& image)
     cv::Mat features;
     _netExt->extractFeature(face,features);          
     //classify image
-    _faceData->returnClosestIDNameScore(features, name_label, score_label);
-    LOG(WARNING)<< "Face: "<< score_label <<" Label "<< name_label;
+    _faceData->returnClosestIDNameScore(features, id, name_label, score_label);
     cv::Rect pt = _faceExt->_faceRect[num_face];
     osstream_result << "Label: "<< name_label <<" score: " << score_label << " x: " << pt.tl().x << " y: "<< pt.tl().y<< " w: " << pt.width<< " h: " << pt.height<< std::endl;
   
