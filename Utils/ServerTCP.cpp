@@ -16,26 +16,21 @@ session(
 {
   try
   {
-    //for (;;)
-    //{
+    for (;;)
+    {
       // char data[max_length];
       boost::array<char,max_length> buf;
       boost::system::error_code error;
       size_t length = sock.read_some(boost::asio::buffer(buf), error);
       if (error == boost::asio::error::eof)
-        // break; // Connection closed cleanly by peer.
-        return;
+        break; // Connection closed cleanly by peer.
       else if (error)
         throw boost::system::system_error(error); // Some other error.
       //Choose method, which should be proccessed
       string message = std::string(buf.data(), length);
       vector<string> splitted_message;
       boost::split(splitted_message, message, boost::is_any_of(" "));
-      // cerr<<"Splited message"<<endl;
-      // for(auto& elem : splitted_message)
-      //   cerr<<elem <<" ";
-      // cerr<<endl;
-      if(splitted_message[0] == server->_classifyProtocol) 
+      if(splitted_message[0] == server->_classifyProtocol) //run Face-Verification at image
       {
         //Download image
         cv::Mat image;
@@ -55,24 +50,29 @@ session(
           boost::asio::write(sock, boost::asio::buffer( error_link.c_str(), error_link.length()));
         }
       }
-      else if(splitted_message[0] == server->_statusProtocol) 
+      else if(splitted_message[0] == server->_statusProtocol) //return status of program
       {
         std::string s = server->returnStatus();
         boost::asio::write(sock, boost::asio::buffer( s.c_str(), s.length()));
       }
-      else if(splitted_message[0] == server->_stopProtocol) 
+      else if(splitted_message[0] == server->_stopProtocol) //stop server
       {
         boost::asio::write(sock, boost::asio::buffer(server->_stopMessage.c_str(), server->_stopMessage.length()));
         server->stopServer();
         sock.close();
-        // break;
+        break;
+      }
+      else if(splitted_message[0] == server->_echoProtocol)
+      {  
+          //return same message afer echo
+          boost::asio::write(sock, boost::asio::buffer(splitted_message[1].c_str(), splitted_message[1].length()));
       }
       else //command not found
       {
         boost::asio::write(sock, boost::asio::buffer(server->_notFound.c_str(), server->_notFound.length()));
       }
       
-    //}
+    }
   }
   catch (std::exception& e)
   {
@@ -133,7 +133,8 @@ void
 ServerTCP_Face::stopServer()
 {
   _stop = true;  
-  _io_service.stop();
+  // _io_service.stop();
+  LOG(WARNING) << "Server Stoped";
 }
 
 void 
@@ -179,7 +180,13 @@ std::string
 ServerTCP_Face::returnStatus()
 {
   std::ostringstream oss;
-  oss << "IP: "<< _ipServer << " Port: "<< _portNumber << std::endl;
+
+  oss <<"Version:" << _versionFV << " IP: "<< _ipServer << " Port: "<< _portNumber << " Log Path: "<< _pathLog <<" PID: "<< ::getpid() << std::endl;
   std::string s = oss.str();
   return s;
+}
+
+ServerTCP_Face::~ServerTCP_Face()
+{
+  
 }

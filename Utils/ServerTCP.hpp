@@ -33,9 +33,12 @@ public:
   std::string _classifyProtocol  = "classify";
   std::string _statusProtocol    = "status";
   std::string _stopProtocol      = "stop";
+  std::string _echoProtocol      = "echo";
   std::string _notFound          = "Command Not Found, available command: classify <link>, status, stop";
   std::string _stopMessage       = "Server will be stopped";
   std::string _errorDownload     = "Error when download link: ";
+  ~ServerTCP_Face();
+  
 private:
   void initLoggig();
 
@@ -50,6 +53,8 @@ private:
   std::shared_ptr<FaceExtractor>   _faceExt;
   std::shared_ptr<FetureExtractor> _netExt;
   std::shared_ptr<FaceDataBase>    _faceData;
+
+  std::string     _versionFV = "0.1";
  
  
 }; 
