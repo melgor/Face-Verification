@@ -167,7 +167,7 @@ ServerTCP_Face::runFaceVerification(cv::Mat& image)
     //classify image
     _faceData->returnClosestIDNameScore(features, id, name_label, score_label);
     cv::Rect pt = _faceExt->_faceRect[num_face];
-    osstream_result << "Label: "<< name_label <<" score: " << score_label << " x: " << pt.tl().x << " y: "<< pt.tl().y<< " w: " << pt.width<< " h: " << pt.height<< std::endl;
+    osstream_result << "Label: "<< name_label <<", score: " << score_label << ", x: " << pt.tl().x << ", y: "<< pt.tl().y<< ", w: " << pt.width<< ", h: " << pt.height<< std::endl;
     num_face++;
   }
   if(num_face == 0)
@@ -188,5 +188,5 @@ ServerTCP_Face::returnStatus()
 
 ServerTCP_Face::~ServerTCP_Face()
 {
-  
+
 }
