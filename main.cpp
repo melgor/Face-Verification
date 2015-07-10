@@ -24,24 +24,23 @@ int main(int argc, char **argv)
   #endif
   if(conf.mode == "extract")
   {
+    //Extract featutes from images pointed by config:Extract.ImageListDB
     FetureExtractor net_ext(conf);
     net_ext.extractAllFeatures();
   }
   else if(conf.mode == "verify")
   {
+    //Check accuracy of model. It read data from config: TestModel and return final accuracy
     cout<<"Verify"<<endl;
     Verificator verificator(conf);
     verificator.verify();
-
-  }
-  else if(conf.mode == "train")
-  {
-    Verificator verificator(conf);
-    // verificator.train();
-
   }
   else if(conf.mode == "detect")
   {
+    //Detect faces on given images: 
+    //if folder: for each image in folder
+    //if scene: for one scene
+    //and save detected faces (alignment)
     if (conf.folderpath != "")
     {
       //so far used when in image is only one face, centered for image. Does not run Face Detection Algorithm
@@ -109,6 +108,10 @@ int main(int argc, char **argv)
   }
   else if (conf.mode == "demo")
   { 
+    //Run demo of Face Verification process:
+    //1. Read images given by --scene ( can be multiple images, paths separated by ',')
+    //2. Run all verification process: detection of all face and verificate each
+    //3. Display image with rectangle and names 
     FaceExtractor front(conf);
     FetureExtractor net_ext(conf);
     FaceDataBase face_data(conf);
@@ -165,11 +168,13 @@ int main(int argc, char **argv)
   }
   else if (conf.mode == "daemon")
   {
+    //Run Deamon with watching the folder. When new image will be placed, the FV will be runned and result saved to file
     Daemon daemon(conf);
     daemon.run();
   }
   else if (conf.mode == "server")
   {
+    //Run Server side of Face-Verification. Read more at Drive
     ServerTCP_Face server(conf);
     server.run();
   }
@@ -191,72 +196,73 @@ int main(int argc, char **argv)
   }
   else if (conf.mode == "create_model")
   {
-      std::cerr<<"Create model 2D"<<endl;
-      cv::Mat image = cv::imread(conf.nameScene);
-      FaceAttribute faceAtt(conf);
-      FacePoints face_points;
-      faceAtt.detectFacePoint(image, face_points);
-      std::vector<int> values_point;
-      std::vector<int> left_eye;
-      std::vector<int> right_eye;
-      //nose
-      // values_point.push_back(30);
-      //left eye
-      left_eye.push_back(36);
-      left_eye.push_back(37);
-      left_eye.push_back(38);
-      left_eye.push_back(39);
-      left_eye.push_back(40);
-      left_eye.push_back(41);
-      //right eye
-      right_eye.push_back(42);
-      right_eye.push_back(43);
-      right_eye.push_back(44);
-      right_eye.push_back(45);
-      right_eye.push_back(46);
-      right_eye.push_back(47);
-      // //left mouth
-      // values_point.push_back(48);
-      // //right mouth
-      // values_point.push_back(54);
-      // //middle mouth
-      values_point.push_back(62);
+    //Create model of Alignment (choose which point should create model)
+    std::cerr<<"Create model 2D"<<endl;
+    cv::Mat image = cv::imread(conf.nameScene);
+    FaceAttribute faceAtt(conf);
+    FacePoints face_points;
+    faceAtt.detectFacePoint(image, face_points);
+    std::vector<int> values_point;
+    std::vector<int> left_eye;
+    std::vector<int> right_eye;
+    //nose
+    // values_point.push_back(30);
+    //left eye
+    left_eye.push_back(36);
+    left_eye.push_back(37);
+    left_eye.push_back(38);
+    left_eye.push_back(39);
+    left_eye.push_back(40);
+    left_eye.push_back(41);
+    //right eye
+    right_eye.push_back(42);
+    right_eye.push_back(43);
+    right_eye.push_back(44);
+    right_eye.push_back(45);
+    right_eye.push_back(46);
+    right_eye.push_back(47);
+    // //left mouth
+    // values_point.push_back(48);
+    // //right mouth
+    // values_point.push_back(54);
+    // //middle mouth
+    values_point.push_back(62);
 
-      std::vector<cv::Point2f> point_model_6,point_model_68;
+    std::vector<cv::Point2f> point_model_6,point_model_68;
 
-      for(auto& elem : values_point)
-      {
-        point_model_6.push_back(face_points[elem]);
-        // cv::Mat cct = image.clone();
-        // cv::circle(cct,face_points[0][elem],3,cv::Scalar::all(255),-1);
-        // cv::imwrite(std::to_string(elem) + "facepoint.jpg",cct);
-        // cerr<<"6: "<<face_points[0][elem]<<endl;
+    for(auto& elem : values_point)
+    {
+      point_model_6.push_back(face_points[elem]);
+      // cv::Mat cct = image.clone();
+      // cv::circle(cct,face_points[0][elem],3,cv::Scalar::all(255),-1);
+      // cv::imwrite(std::to_string(elem) + "facepoint.jpg",cct);
+      // cerr<<"6: "<<face_points[0][elem]<<endl;
 
-      }
-      std::vector<cv::Point2f> left_eye_model;
-      for(auto& elem : left_eye)
-      {
-        left_eye_model.push_back(face_points[elem]);
-      }
-      std::vector<cv::Point2f> right_eye_model;
-      for(auto& elem : right_eye)
-      {
-        right_eye_model.push_back(face_points[elem]);
-      }
-      //collect all 68 points
-      for(auto& elem : face_points)
-      {
-        point_model_68.push_back(elem);
-      }
-      //calculate mean_point using eye_model
-      cv::Point2f center_left_eye, center_right_eye;
-      calculateMeanPoint(left_eye_model,center_left_eye);
-      calculateMeanPoint(right_eye_model,center_right_eye);
-      point_model_6.push_back(center_left_eye);
-      point_model_6.push_back(center_right_eye);
+    }
+    std::vector<cv::Point2f> left_eye_model;
+    for(auto& elem : left_eye)
+    {
+      left_eye_model.push_back(face_points[elem]);
+    }
+    std::vector<cv::Point2f> right_eye_model;
+    for(auto& elem : right_eye)
+    {
+      right_eye_model.push_back(face_points[elem]);
+    }
+    //collect all 68 points
+    for(auto& elem : face_points)
+    {
+      point_model_68.push_back(elem);
+    }
+    //calculate mean_point using eye_model
+    cv::Point2f center_left_eye, center_right_eye;
+    calculateMeanPoint(left_eye_model,center_left_eye);
+    calculateMeanPoint(right_eye_model,center_right_eye);
+    point_model_6.push_back(center_left_eye);
+    point_model_6.push_back(center_right_eye);
 
-      savePoints(conf.model2D_6,point_model_6);
-      savePoints(conf.model2D_68,point_model_68);
+    savePoints(conf.model2D_6,point_model_6);
+    savePoints(conf.model2D_68,point_model_68);
 
   }
   return 0;

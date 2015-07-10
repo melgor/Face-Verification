@@ -10,8 +10,11 @@ class FaceDataBase
 public:
   FaceDataBase(){};
   FaceDataBase(struct Configuration& config);
+  //return only ID of person
   int         returnClosestID(cv::Mat& feature);
+  //return only name of Person
   std::string returnClosestIDName(cv::Mat& feature);
+  //return all information about closest match in DataBase
   void returnClosestIDNameScore(cv::Mat& feature, int& id, std::string& name, float& score);
   ~FaceDataBase();
 

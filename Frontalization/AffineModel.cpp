@@ -13,6 +13,7 @@ using namespace cv;
 
 AffineModel::AffineModel(Configuration& config)
 {
+  //Load Face model from disk
   loadPoints(config.model2D_6,_pointModel6);
   loadPoints(config.model2D_68,_pointModel68);
   //nose

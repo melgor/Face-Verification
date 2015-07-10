@@ -7,22 +7,25 @@ class AffineModel
 {
 public:
   AffineModel(Configuration& config);
+  //Estimate Matrix for one Image and detected FacePoints
   void estimateCamera(
                         FacePoints& facesPoints,
                         cv::Size& imageSize,
                         cv::Mat& cameraModels
                         );
+  //Estimate Matrix for several Images and detected FacePoints
   void estimateCamera(
                         std::vector<FacePoints>& facesPoints,
                         std::vector<cv::Size>& imageSize,
                         std::vector<cv::Mat>& cameraModels
                         );
   ~AffineModel();
-
+ 
   FacePoints& getModel6();  
   FacePoints& getModel68();
 
  private: 
+  //For debug, draw detected FacePoints
   void drawFacePoints( FacePoints& currentFacePoints,
                        cv::Size&       imageSize   );
   FacePoints       _pointModel6;

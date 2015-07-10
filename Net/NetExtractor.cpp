@@ -81,7 +81,7 @@ NetExtractor::extract(
 void 
 NetExtractor::reshape(int size)
 {
-
+ //TODO: write code to reshape net
 }
 
 NetExtractor::~NetExtractor()

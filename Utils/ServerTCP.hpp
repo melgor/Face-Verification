@@ -27,21 +27,24 @@ public:
   ServerTCP_Face(Configuration& config);
   void run();
   void stopServer();
+  //Run Face Verification on given Image
   std::string runFaceVerification(cv::Mat& image);
+  //Return current status of Server
   std::string returnStatus();
-   //type of message
+  //type of message which are accepted by server
   std::string _classifyProtocol  = "classify";
   std::string _statusProtocol    = "status";
   std::string _stopProtocol      = "stop";
   std::string _echoProtocol      = "echo";
+  //Answers to client, when some error occur
   std::string _notFound          = "Command Not Found, available command: classify <link>, status, stop";
   std::string _stopMessage       = "Server will be stopped";
   std::string _errorDownload     = "Error when download link: ";
   ~ServerTCP_Face();
   
 private:
+  //Initilizing logging 
   void initLoggig();
-
   //Configuration file
   Configuration   _config;
   std::string     _pathLog;

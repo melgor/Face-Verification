@@ -13,7 +13,7 @@ CFLAGS=-c -Wall -std=c++11 -g3 -Ofast -msse2  -I. -I/home/blcv/CODE/Face_LIB/dli
 LDFLAGS=-L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_calib3d -lopencv_ml -ltbb \
 	-lboost_filesystem -lboost_system -lboost_program_options -lboost_serialization -lboost_iostreams \
 	-L/home/blcv/CODE/Face_LIB/dlib-18.12/examples/build/dlib_build/ -ldlib -lpthread  -L/home/blcv/LIB/yaml-cpp-0.5.1/ -lyaml-cpp \
-	-L/home/blcv/LIB/caffe_master/build/lib/ -lcaffe -L/home/blcv/LIB/liblinear/ -llinear \
+	-L/home/blcv/LIB/caffe_master/build/lib/ -lcaffe \
 	-L/home/blcv/LIB/liblinear/blas/ -lblas -lglog -lcurl -lcurlcpp $(CPU_ONLY_FLAGS)
 
 SOURCES=${wildcard *.cpp Frontalization/*.cpp Utils/*.cpp Net/*.cpp Verification/*.cpp inotify-cxx/*.cpp}
