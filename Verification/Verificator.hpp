@@ -17,6 +17,7 @@ public:
   float predictFull(cv::Mat featureOne, cv::Mat featureTwo);              
   //scale data
   void scaleData(cv::Mat features, cv::Mat& scaledFeatures);
+  void getValueBeforeScaling(cv::Mat features, cv::Mat& scaledFeatures);
   ~Verificator();
 
 private:

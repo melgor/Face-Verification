@@ -2,6 +2,7 @@
 #include <sstream>
 #include <thread>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/array.hpp>
 
 using boost::asio::ip::tcp;
@@ -30,6 +31,11 @@ session(
       string message = std::string(buf.data(), length);
       vector<string> splitted_message;
       boost::split(splitted_message, message, boost::is_any_of(" "));
+      //Debug
+      for(auto& str : splitted_message)
+      {
+        std::cerr<<str<<std::endl;
+      }
       if(splitted_message[0] == server->_classifyProtocol) //run Face-Verification at image
       {
         //Download image
@@ -66,6 +72,30 @@ session(
       {  
           //return same message afer echo
           boost::asio::write(sock, boost::asio::buffer(splitted_message[1].c_str(), splitted_message[1].length()));
+      }
+      else if(splitted_message[0] == server->_addPersonProtocol)
+      {
+        if(splitted_message.size() != 3)
+        {
+          boost::asio::write(sock, boost::asio::buffer(server->_argumentAddPerson.c_str(), server->_argumentAddPerson.length()));
+        }
+        else
+        {
+          //Add new person to database
+          cv::Mat image;
+          bool error_down = loadImage(splitted_message[2], image); 
+          if(error_down)
+          { 
+            std::string message = server->addNewPerson(splitted_message[1], image);
+            boost::asio::write(sock, boost::asio::buffer( message.c_str(), message.length()));
+          }
+          else
+          {
+            std::string error_link = server->_errorDownload + splitted_message[1];
+            boost::asio::write(sock, boost::asio::buffer( error_link.c_str(), error_link.length()));
+          }
+        }
+       
       }
       else //command not found
       {
@@ -163,7 +193,7 @@ ServerTCP_Face::runFaceVerification(cv::Mat& image)
   {
     //extract feature
     cv::Mat features;
-    _netExt->extractFeature(face,features);          
+    _netExt->extractFeature(face, features);          
     //classify image
     _faceData->returnClosestIDNameScore(features, id, name_label, score_label);
     cv::Rect pt = _faceExt->_faceRect[num_face];
@@ -185,6 +215,34 @@ ServerTCP_Face::returnStatus()
   std::string s = oss.str();
   return s;
 }
+
+std::string        
+ServerTCP_Face::addNewPerson(
+                              std::string& name
+                            , cv::Mat& image )
+{
+  //change "_" to Spaces
+  boost::replace_all(name, "_", " ");
+  //check if this name exist in DataBase
+  if(_faceData->checkName(name))
+    return name + _idExist;
+
+  //get frontal face
+  std::vector<cv::Mat> outFrontals;
+  _faceExt->getFrontalFace(image, outFrontals);
+  if (outFrontals.size() != 1)
+      return _noFaceDetected;
+
+  //extract feature
+  cv::Mat features;
+  _netExt->extractFeature(outFrontals[0], features);    
+  
+  
+  //addd feature and id to DataBase     
+  _faceData->addNewPerson(name, features, image);
+
+  return _addedPerson;
+} 
 
 ServerTCP_Face::~ServerTCP_Face()
 {

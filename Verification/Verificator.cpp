@@ -190,6 +190,12 @@ Verificator::readVerificationData()
   }
 }
 
+void 
+Verificator::getValueBeforeScaling(Mat features, Mat& scaledFeatures)
+{
+  scaledFeatures =  features.mul(_skalerDiffSK) + _skalerMinSK;
+}
+
 
 
 Verificator::~Verificator()

@@ -51,6 +51,8 @@ struct Configuration
   std::string  metric;
   std::string  faceData;
   std::string  faceLabels;
+  std::string  faceImages;
+  std::string  faceFolder;
   float        threshold;
   bool         scaleFeature;
   std::string  valLabel;
@@ -112,6 +114,8 @@ struct Configuration
     scaleFeature       = pt.get<bool>("Verification.ScaleFeature");
     faceData           = mainFolder + pt.get<std::string>("Verification.FaceData");
     faceLabels         = mainFolder + pt.get<std::string>("Verification.FaceLabels");
+    faceImages         = mainFolder + pt.get<std::string>("Verification.FaceImages");
+    faceFolder         = mainFolder + pt.get<std::string>("Verification.FaceFolder");
     valLabel           = mainFolder + pt.get<std::string>("TestModel.val_path");
     ver1Label          = mainFolder + pt.get<std::string>("TestModel.val_ver1");
     ver2Label          = mainFolder + pt.get<std::string>("TestModel.val_ver2");
@@ -165,6 +169,8 @@ struct Configuration
     LOG(WARNING) <<"ValData:           "<<valData;
     LOG(WARNING) <<"FaceData:          "<<faceData;
     LOG(WARNING) <<"FaceLabels:        "<<faceLabels;
+    LOG(WARNING) <<"FaceImages:        "<<faceImages;
+    LOG(WARNING) <<"FaceFolder:        "<<faceFolder;
     LOG(WARNING) <<"Metric:            "<<metric;
     LOG(WARNING) <<"Thres:             "<<threshold;
     LOG(WARNING) <<"ScaleFeature:      "<<scaleFeature;
