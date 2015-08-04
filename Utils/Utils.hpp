@@ -33,6 +33,7 @@ struct Configuration
   float        resizeImageRatio;
   std::string  calibOption;
   bool         symetry;
+  std::string  cropping;
   std::string  model2D_6;
   std::string  model2D_68;
   std::string  frontalization;
@@ -94,6 +95,7 @@ struct Configuration
     resizeImageRatio   = pt.get<float>("FaceDecetion.ResizeImageRatio");
     calibOption        = pt.get<std::string>("FaceDecetion.CalibOption");
     symetry            = pt.get<bool>("FaceDecetion.Symetry");
+    cropping           = pt.get<std::string>("FaceDecetion.Cropping");
     model2D_6          = mainFolder + pt.get<std::string>("FaceDecetion.Model2D_6points");
     model2D_68         = mainFolder + pt.get<std::string>("FaceDecetion.Model2D_68points");
     frontalization     = pt.get<std::string>("FaceDecetion.Frontalization");
@@ -147,6 +149,7 @@ struct Configuration
     LOG(WARNING)<<"ResizeImageRatio: "<<resizeImageRatio;
     LOG(WARNING)<<"CalibOption:      "<<calibOption;
     LOG(WARNING)<<"Symetry:          "<<symetry;
+    LOG(WARNING)<<"Cropping:         "<<cropping;
     LOG(WARNING)<<"Model2D_6:        "<<model2D_6;
     LOG(WARNING)<<"Model2D_68:       "<<model2D_68;
     LOG(WARNING)<<"------------Net---------------------------";

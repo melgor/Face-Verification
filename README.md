@@ -16,6 +16,4 @@ Dependies:
   - parseYAML (parse model for face frontalization, TODO: remove this dependence)
   - opencv (main library used for Computer Vision)
   - boost (used for parser of command line, config file, file system)
-  - liblinear (for verification purpose, TODO: remove, not needed any longer)
-
  

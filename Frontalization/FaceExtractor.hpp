@@ -44,11 +44,17 @@ class FaceExtractor
                   );
 
 
+
+    //Models need for Face Extraction
     FaceAttribute*    _faceatt;
     CameraModel*      _camera;
     Frontalization3D* _align;
     AffineModel*      _affine;
+    //configuration
     std::string       _frontalization;
+    std::string       _cropping;
+    std::string       _croppingNormal = "Standard";
+    std::string       _croppingTight  = "Tight";
     //option for output face
     cv::Rect          _face2d;
     cv::Size          _face2dSize;

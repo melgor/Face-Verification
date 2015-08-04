@@ -20,6 +20,7 @@ FaceExtractor::FaceExtractor(Configuration& config)
   _align          = new Frontalization3D(config, _camera);
   _affine         = new AffineModel(config);
   _frontalization = config.frontalization;
+  _cropping       = config.cropping ;
   _face2d         = Rect(40,60,239,346);
   _face2dSize     = Size(320,407);
   if (_frontalization == "2D")
@@ -126,8 +127,14 @@ FaceExtractor::alignment2D(
       per_mat.at<float>(2,2) = 1.0f;
       perspectiveTransform(facesPoints[i], facesPoints[i], per_mat);
     }
-    outFrontal[i] = face_align[i](_face2d).clone();
-    // outFrontal[i] = face_align[i].clone();
+    if(_cropping == _croppingNormal)
+    {
+      outFrontal[i] = face_align[i].clone();
+    }
+    else if(_cropping == _croppingTight)
+    {
+      outFrontal[i] = face_align[i](_face2d).clone();
+    }
 
     #ifdef __DEBUG
     Mat cc = face_align[i].clone();  
